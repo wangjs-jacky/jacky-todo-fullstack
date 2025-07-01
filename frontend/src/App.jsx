@@ -13,7 +13,7 @@ function App() {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch('http://localhost:3001/')
+      const response = await fetch('http://localhost:3001/api/todos')
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
@@ -33,17 +33,35 @@ function App() {
   }, [])
 
   // 添加新的待办事项
-  const addTodo = () => {
+  const addTodo = async () => {
     if (inputValue.trim() === '') return
-    
+
     const newTodo = {
       id: Date.now(),
       text: inputValue.trim(),
       completed: false
     }
+
+    setInputValue('');
+
+    // setTodos([...todos, newTodo])
+    const response = await fetch(`http://localhost:3001/api/todos/add`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newTodo)
+    });
     
-    setTodos([...todos, newTodo])
-    setInputValue('')
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('添加成功:', result);
+    
+    // 重新获取数据以更新列表
+    await fetchTodos();
   }
 
   // 处理回车键添加
@@ -55,14 +73,17 @@ function App() {
 
   // 切换待办事项状态
   const toggleTodo = (id) => {
-    setTodos(todos.map(todo => 
+    setTodos(todos.map(todo =>
       todo.id === id ? { ...todo, completed: !todo.completed } : todo
     ))
   }
 
   // 删除待办事项
-  const deleteTodo = (id) => {
-    setTodos(todos.filter(todo => todo.id !== id))
+  const deleteTodo = async (id) => {
+    // 发送删除请求
+    await fetch(`http://localhost:3001/api/todos/delete/${id}`);
+    // 删除成功后，更新待办事项列表
+    await fetchTodos()
   }
 
   // 开始编辑待办事项
@@ -74,8 +95,8 @@ function App() {
   // 保存编辑
   const saveEdit = (id) => {
     if (editValue.trim() === '') return
-    
-    setTodos(todos.map(todo => 
+
+    setTodos(todos.map(todo =>
       todo.id === id ? { ...todo, text: editValue.trim() } : todo
     ))
     setEditingId(null)
@@ -100,46 +121,46 @@ function App() {
   return (
     <div className="container">
       <h1>📝 TODO List</h1>
-      
+
       {/* 错误提示 */}
       {error && (
-        <div style={{ 
-          backgroundColor: '#ffebee', 
-          color: '#c62828', 
-          padding: '10px', 
-          borderRadius: '4px', 
+        <div style={{
+          backgroundColor: '#ffebee',
+          color: '#c62828',
+          padding: '10px',
+          borderRadius: '4px',
           marginBottom: '20px',
           textAlign: 'center'
         }}>
           {error}
-          <button 
+          <button
             onClick={fetchTodos}
-            style={{ 
-              marginLeft: '10px', 
-              padding: '5px 10px', 
-              backgroundColor: '#c62828', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '3px', 
-              cursor: 'pointer' 
+            style={{
+              marginLeft: '10px',
+              padding: '5px 10px',
+              backgroundColor: '#c62828',
+              color: 'white',
+              border: 'none',
+              borderRadius: '3px',
+              cursor: 'pointer'
             }}
           >
             重试
           </button>
         </div>
       )}
-      
+
       {/* 加载状态 */}
       {loading && (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '20px', 
-          color: '#666' 
+        <div style={{
+          textAlign: 'center',
+          padding: '20px',
+          color: '#666'
         }}>
           正在加载待办事项...
         </div>
       )}
-      
+
       {/* 添加新待办事项的表单 */}
       <div className="todo-form">
         <input
@@ -168,7 +189,7 @@ function App() {
                 checked={todo.completed}
                 onChange={() => toggleTodo(todo.id)}
               />
-              
+
               {/* 显示文本或编辑输入框 */}
               {editingId === todo.id ? (
                 <div className="edit-container">
@@ -182,13 +203,13 @@ function App() {
                     autoFocus
                   />
                   <div className="edit-buttons">
-                    <button 
+                    <button
                       className="save-btn"
                       onClick={() => saveEdit(todo.id)}
                     >
                       保存
                     </button>
-                    <button 
+                    <button
                       className="cancel-btn"
                       onClick={cancelEdit}
                     >
@@ -197,22 +218,22 @@ function App() {
                   </div>
                 </div>
               ) : (
-                <span 
+                <span
                   className={`todo-text ${todo.completed ? 'completed' : ''}`}
                   onDoubleClick={() => startEdit(todo)}
                 >
                   {todo.text}
                 </span>
               )}
-              
+
               <div className="action-buttons">
-                <button 
+                <button
                   className="edit-btn"
                   onClick={() => startEdit(todo)}
                 >
                   编辑
                 </button>
-                <button 
+                <button
                   className="delete-btn"
                   onClick={() => deleteTodo(todo.id)}
                 >
@@ -227,8 +248,8 @@ function App() {
       {/* 统计信息 */}
       {todos.length > 0 && (
         <div style={{ marginTop: '20px', textAlign: 'center', color: '#666' }}>
-          总计: {todos.length} 项 | 
-          已完成: {todos.filter(todo => todo.completed).length} 项 | 
+          总计: {todos.length} 项 |
+          已完成: {todos.filter(todo => todo.completed).length} 项 |
           未完成: {todos.filter(todo => !todo.completed).length} 项
         </div>
       )}

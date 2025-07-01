@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // 简单的 GET / 路由 - Express 5 版本
-app.get('/', async (req, res) => {
+app.get('/api/todos', async (req, res) => {
   try {
     const data = await fs.readFile('./data.json', 'utf8');
     const todos = JSON.parse(data);
@@ -26,6 +26,59 @@ app.get('/', async (req, res) => {
       message: error.message
     });
   }
+});
+
+app.post('/api/todos/add', async (req, res) => {
+  try {
+    const { text, completed = false } = req.body;
+    if (!text || text.trim() === '') {
+      return res.status(400).json({ 
+        error: '待办事项内容不能为空' 
+      });
+    }
+    
+    // 读取现有数据
+    const data = await fs.readFile('./data.json', 'utf8');
+    const todos = JSON.parse(data);
+    
+    // 创建新的待办事项
+    const newTodo = {
+      id: Date.now(),
+      text: text.trim(),
+      completed: completed
+    };
+    
+    // 添加到数组
+    todos.push(newTodo);
+    
+    // 保存到文件
+    await fs.writeFile('./data.json', JSON.stringify(todos, null, 2));
+    
+    res.status(201).json({ 
+      code: 200, 
+      message: '待办事项添加成功',
+      data: newTodo 
+    });
+  } catch (error) {
+    console.error('添加待办事项失败:', error);
+    res.status(500).json({ 
+      error: '添加待办事项失败',
+      message: error.message 
+    });
+  }
+});
+
+app.get('/api/todos/delete/:id', async (req, res) => {
+  const { id } = req.params;
+  const data = await fs.readFile('./data.json', 'utf8');
+  const todos = JSON.parse(data);
+  const todo = todos.find(todo => todo.id === parseInt(id));
+  if (!todo) {
+    return res.status(200).json({ code: 0, error: '待办事项不存在' });
+  }
+  const filteredTodos = todos.filter(todo => todo.id != id);
+  await fs.writeFile('./data.json', JSON.stringify(filteredTodos, null, 2));
+  res.status(200).json({ code: 200, message: '待办事项删除成功' });
 });
 
 // 简单的 GET / 路由 - Express 5 版本
