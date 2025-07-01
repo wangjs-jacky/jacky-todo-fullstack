@@ -1,0 +1,26 @@
+{
+  "watch": ["server.js", "data.json"],
+  "ext": "js,json",
+  "ignore": [
+    "node_modules/",
+    "*.test.js",
+    "*.spec.js",
+    ".git",
+    "logs",
+    "*.log"
+  ],
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": "500",
+  "restartable": "rs",
+  "verbose": true,
+  "colours": true,
+  "execMap": {
+    "js": "node"
+  },
+  "events": {
+    "restart": "echo '🔄 服务器重启中...'",
+    "crash": "echo '💥 服务器崩溃，正在重启...'"
+  }
+} 

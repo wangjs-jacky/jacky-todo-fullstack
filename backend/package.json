@@ -1,0 +1,21 @@
+{
+  "name": "jacky-todo-backend",
+  "version": "1.0.0",
+  "description": "Express.js backend server for Jacky Todo Fullstack App",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "dev:chrome": "nodemon --inspect server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "keywords": ["express", "backend", "api"],
+  "author": "",
+  "license": "MIT"
+} 
