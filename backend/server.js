@@ -9,7 +9,7 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
-// 简单的 GET / 路由 - Express 5 版本
+// 【查】询待办事项
 app.get('/api/todos', async (req, res) => {
   try {
     const data = await fs.readFile('./data.json', 'utf8');
@@ -28,6 +28,8 @@ app.get('/api/todos', async (req, res) => {
   }
 });
 
+
+// 【增】待办事项
 app.post('/api/todos/add', async (req, res) => {
   try {
     const { text, completed = false } = req.body;
@@ -68,6 +70,7 @@ app.post('/api/todos/add', async (req, res) => {
   }
 });
 
+// 【删】待办事项
 app.get('/api/todos/delete/:id', async (req, res) => {
   const { id } = req.params;
   const data = await fs.readFile('./data.json', 'utf8');
@@ -79,6 +82,27 @@ app.get('/api/todos/delete/:id', async (req, res) => {
   const filteredTodos = todos.filter(todo => todo.id != id);
   await fs.writeFile('./data.json', JSON.stringify(filteredTodos, null, 2));
   res.status(200).json({ code: 200, message: '待办事项删除成功' });
+});
+
+// 【改】待办事项
+app.post('/api/todos/update/:id', async (req, res) => {
+  console.log("wjs: req.body",req.body);
+  const { id } = req.params;
+  const data = await fs.readFile('./data.json', 'utf8');
+  const todos = JSON.parse(data);
+  const todo = todos.find(todo => todo.id === parseInt(id));
+  if (!todo) {
+    return res.status(200).json({ code: 0, error: '待办事项不存在' });
+  }
+  // 只有非 undefined 值才更新
+  if (req.body.text !== undefined) {
+    todo.text = req.body.text;
+  }
+  if (req.body.completed !== undefined) {
+    todo.completed = req.body.completed;
+  }
+  await fs.writeFile('./data.json', JSON.stringify(todos, null, 2));
+  res.status(200).json({ code: 200, message: '待办事项更新成功' });
 });
 
 // 简单的 GET / 路由 - Express 5 版本

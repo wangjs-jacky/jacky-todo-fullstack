@@ -11,7 +11,6 @@ function App() {
   // 从后端获取待办事项数据
   const fetchTodos = async () => {
     try {
-      setLoading(true)
       setError(null)
       const response = await fetch('http://localhost:3001/api/todos')
       if (!response.ok) {
@@ -22,8 +21,6 @@ function App() {
     } catch (err) {
       console.error('获取待办事项失败:', err)
       setError('获取数据失败，请检查后端服务是否运行')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -52,14 +49,14 @@ function App() {
       },
       body: JSON.stringify(newTodo)
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const result = await response.json();
     console.log('添加成功:', result);
-    
+
     // 重新获取数据以更新列表
     await fetchTodos();
   }
@@ -72,10 +69,17 @@ function App() {
   }
 
   // 切换待办事项状态
-  const toggleTodo = (id) => {
-    setTodos(todos.map(todo =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ))
+  const toggleTodo = async (id, checked) => {
+    // setTodos(todos.map(todo =>
+    await fetch(`http://localhost:3001/api/todos/update/${id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ completed: checked })
+    });
+
+    await fetchTodos()
   }
 
   // 删除待办事项
@@ -150,17 +154,6 @@ function App() {
         </div>
       )}
 
-      {/* 加载状态 */}
-      {loading && (
-        <div style={{
-          textAlign: 'center',
-          padding: '20px',
-          color: '#666'
-        }}>
-          正在加载待办事项...
-        </div>
-      )}
-
       {/* 添加新待办事项的表单 */}
       <div className="todo-form">
         <input
@@ -187,7 +180,9 @@ function App() {
                 type="checkbox"
                 className="todo-checkbox"
                 checked={todo.completed}
-                onChange={() => toggleTodo(todo.id)}
+                onChange={(e) => {
+                  toggleTodo(todo.id, e.target.checked)
+                }}
               />
 
               {/* 显示文本或编辑输入框 */}

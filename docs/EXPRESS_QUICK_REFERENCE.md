@@ -247,6 +247,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 pnpm run dev:debug
 
 # 在 Chrome 中打开 chrome://inspect
+npm run dev:chrome
 ```
 
 ---
