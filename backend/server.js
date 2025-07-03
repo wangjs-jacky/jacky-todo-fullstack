@@ -71,7 +71,7 @@ app.post('/api/todos/add', async (req, res) => {
 });
 
 // 【删】待办事项
-app.get('/api/todos/delete/:id', async (req, res) => {
+app.post('/api/todos/delete/:id', async (req, res) => {
   const { id } = req.params;
   const data = await fs.readFile('./data.json', 'utf8');
   const todos = JSON.parse(data);

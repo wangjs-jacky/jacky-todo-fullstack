@@ -34,7 +34,6 @@ function App() {
     if (inputValue.trim() === '') return
 
     const newTodo = {
-      id: Date.now(),
       text: inputValue.trim(),
       completed: false
     }
