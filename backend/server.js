@@ -86,7 +86,6 @@ app.post('/api/todos/delete/:id', async (req, res) => {
 
 // 【改】待办事项
 app.post('/api/todos/update/:id', async (req, res) => {
-  console.log("wjs: req.body",req.body);
   const { id } = req.params;
   const data = await fs.readFile('./data.json', 'utf8');
   const todos = JSON.parse(data);
