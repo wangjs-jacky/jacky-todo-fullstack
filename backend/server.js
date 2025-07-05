@@ -1,18 +1,25 @@
 import express from 'express';
 import cors from 'cors';
 import fs from 'fs/promises';
+import dotenv from 'dotenv';
+
+// 加载环境变量
+dotenv.config();
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
+const DATA_FILE = process.env.DATA_FILE_PATH || './data.json';
 
 // 中间件
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3001'
+}));
 app.use(express.json());
 
 // 【查】获取所有待办事项 - GET /api/todos
 app.get('/api/todos', async (req, res) => {
   try {
-    const data = await fs.readFile('./data.json', 'utf8');
+    const data = await fs.readFile(DATA_FILE, 'utf8');
     const todos = JSON.parse(data);
     res.status(200).json({
       data: todos,
@@ -32,7 +39,7 @@ app.get('/api/todos', async (req, res) => {
 app.get('/api/todos/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const data = await fs.readFile('./data.json', 'utf8');
+    const data = await fs.readFile(DATA_FILE, 'utf8');
     const todos = JSON.parse(data);
     const todo = todos.find(todo => todo.id === parseInt(id));
     
@@ -66,7 +73,7 @@ app.post('/api/todos', async (req, res) => {
     }
     
     // 读取现有数据
-    const data = await fs.readFile('./data.json', 'utf8');
+    const data = await fs.readFile(DATA_FILE, 'utf8');
     const todos = JSON.parse(data);
     
     // 创建新的待办事项
@@ -80,7 +87,7 @@ app.post('/api/todos', async (req, res) => {
     todos.push(newTodo);
     
     // 保存到文件
-    await fs.writeFile('./data.json', JSON.stringify(todos, null, 2));
+    await fs.writeFile(DATA_FILE, JSON.stringify(todos, null, 2));
     
     res.status(201).json({ 
       message: '待办事项创建成功',
@@ -108,7 +115,7 @@ app.put('/api/todos/:id', async (req, res) => {
       });
     }
     
-    const data = await fs.readFile('./data.json', 'utf8');
+    const data = await fs.readFile(DATA_FILE, 'utf8');
     const todos = JSON.parse(data);
     const todoIndex = todos.findIndex(todo => todo.id === parseInt(id));
     
@@ -125,7 +132,7 @@ app.put('/api/todos/:id', async (req, res) => {
       completed: completed
     };
     
-    await fs.writeFile('./data.json', JSON.stringify(todos, null, 2));
+    await fs.writeFile(DATA_FILE, JSON.stringify(todos, null, 2));
     res.status(200).json({ 
       message: '待办事项完整更新成功',
       data: todos[todoIndex]
@@ -145,7 +152,7 @@ app.patch('/api/todos/:id', async (req, res) => {
     const { id } = req.params;
     const { text, completed } = req.body;
     
-    const data = await fs.readFile('./data.json', 'utf8');
+    const data = await fs.readFile(DATA_FILE, 'utf8');
     const todos = JSON.parse(data);
     const todoIndex = todos.findIndex(todo => todo.id === parseInt(id));
     
@@ -163,7 +170,7 @@ app.patch('/api/todos/:id', async (req, res) => {
       todos[todoIndex].completed = completed;
     }
     
-    await fs.writeFile('./data.json', JSON.stringify(todos, null, 2));
+    await fs.writeFile(DATA_FILE, JSON.stringify(todos, null, 2));
     res.status(200).json({ 
       message: '待办事项部分更新成功',
       data: todos[todoIndex]
@@ -181,7 +188,7 @@ app.patch('/api/todos/:id', async (req, res) => {
 app.delete('/api/todos/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const data = await fs.readFile('./data.json', 'utf8');
+    const data = await fs.readFile(DATA_FILE, 'utf8');
     const todos = JSON.parse(data);
     const todoIndex = todos.findIndex(todo => todo.id === parseInt(id));
     
@@ -192,7 +199,7 @@ app.delete('/api/todos/:id', async (req, res) => {
     }
     
     const deletedTodo = todos.splice(todoIndex, 1)[0];
-    await fs.writeFile('./data.json', JSON.stringify(todos, null, 2));
+    await fs.writeFile(DATA_FILE, JSON.stringify(todos, null, 2));
     
     res.status(200).json({ 
       message: '待办事项删除成功',

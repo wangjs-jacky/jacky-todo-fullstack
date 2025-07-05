@@ -8,6 +8,9 @@ dependencies:
   cors:
     specifier: ^2.8.5
     version: 2.8.5
+  dotenv:
+    specifier: ^17.0.1
+    version: 17.0.1
   express:
     specifier: ^5.1.0
     version: 5.1.0
@@ -160,6 +163,11 @@ packages:
   /depd@2.0.0:
     resolution: {integrity: sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==, tarball: https://registry.npmmirror.com/depd/-/depd-2.0.0.tgz}
     engines: {node: '>= 0.8'}
+    dev: false
+
+  /dotenv@17.0.1:
+    resolution: {integrity: sha512-GLjkduuAL7IMJg/ZnOPm9AnWKJ82mSE2tzXLaJ/6hD6DhwGfZaXG77oB8qbReyiczNxnbxQKyh0OE5mXq0bAHA==, tarball: https://registry.npmmirror.com/dotenv/-/dotenv-17.0.1.tgz}
+    engines: {node: '>=12'}
     dev: false
 
   /dunder-proto@1.0.1:

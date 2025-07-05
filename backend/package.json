@@ -9,13 +9,18 @@
     "dev:chrome": "nodemon --inspect server.js"
   },
   "dependencies": {
-    "express": "^5.1.0",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.1",
+    "express": "^5.1.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
   },
-  "keywords": ["express", "backend", "api"],
+  "keywords": [
+    "express",
+    "backend",
+    "api"
+  ],
   "author": "",
   "license": "MIT"
-} 
+}
