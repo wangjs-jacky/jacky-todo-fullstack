@@ -6,7 +6,7 @@ alwaysApply: false
 # Cursor Rules: 对话文档生成规则
 
 ## 目标
-每次对话结束后，自动生成一份面向非技术人员的 Markdown 文档，包含完整的实操步骤和参考资料。
+每次对话结束后，自动生成一份面向非技术人员的 Markdown 文档，包含完整的实操步骤、主流工具对比和参考资料。
 
 ## 文档结构要求
 
@@ -16,6 +16,9 @@ alwaysApply: false
 
 ## 概述
 [用通俗语言解释这个技术是什么，解决什么问题]
+
+## 主流工具对比
+[列出该领域的主流工具，对比优缺点，推荐使用场景]
 
 ## 前置条件
 - [列出需要的软件、账号等]
@@ -73,6 +76,49 @@ A: [详细解答]
 - 环境变量使用说明
 - 权限设置指导
 
+## 主流工具对比要求
+
+### 1. 环境变量管理工具
+当用户询问环境变量管理时，必须包含以下工具对比：
+
+#### dotenv vs dotenvx
+- **dotenv**: 传统选择，简单易用，适合小型项目
+- **dotenvx**: 现代化替代方案，支持多环境、加密、验证等功能
+
+#### 其他主流工具
+- **dotenv-cli**: 命令行工具，支持跨平台
+- **dotenv-expand**: 支持变量扩展
+- **config**: 功能丰富的配置管理库
+- **envalid**: 环境变量验证库
+
+### 2. 数据库工具
+当涉及数据库时，提供主流选择：
+- **SQLite**: 轻量级，适合小型应用
+- **PostgreSQL**: 功能强大，适合生产环境
+- **MySQL**: 广泛使用，社区支持好
+- **MongoDB**: NoSQL选择，适合文档数据
+
+### 3. 前端框架
+当涉及前端开发时，对比主流框架：
+- **React**: 最流行，生态丰富
+- **Vue**: 易学易用，中文文档好
+- **Angular**: 企业级，功能完整
+- **Svelte**: 新兴框架，性能优秀
+
+### 4. 后端框架
+当涉及后端开发时，对比主流框架：
+- **Express.js**: Node.js最流行
+- **Fastify**: 高性能选择
+- **Koa**: 轻量级，中间件友好
+- **NestJS**: 企业级，TypeScript优先
+
+### 5. 包管理工具
+当涉及依赖管理时，对比主流工具：
+- **npm**: 默认选择，生态最全
+- **yarn**: 速度快，锁定文件
+- **pnpm**: 节省空间，严格依赖
+- **bun**: 新兴工具，性能优秀
+
 ## 特殊规则
 
 ### 1. 环境配置类
@@ -81,30 +127,52 @@ A: [详细解答]
 - 环境变量配置
 - 配置文件位置
 - .gitignore 更新
+- 主流工具对比
 
 ### 2. 代码实现类
 - 完整的代码示例
 - 依赖安装说明
 - 运行和测试方法
 - 错误处理指导
+- 性能优化建议
 
 ### 3. 部署发布类
 - 完整的部署流程
 - 环境要求
 - 监控和维护
 - 回滚方案
-
-
+- 主流平台对比
 
 ## 示例模板
 
-以"Node.js 项目接入 dotenv 环境变量管理"为例：
+以"Node.js 项目接入环境变量管理"为例：
 
 ```markdown
-# Node.js 项目接入 dotenv 环境变量管理
+# Node.js 项目接入环境变量管理
 
 ## 概述
-dotenv 是一个用于管理环境变量的工具，可以让我们把敏感信息（如数据库密码、API密钥）从代码中分离出来，提高安全性。
+环境变量管理是开发中的重要概念，可以让我们把敏感信息（如数据库密码、API密钥）从代码中分离出来，提高安全性和可维护性。
+
+## 主流工具对比
+
+### dotenv vs dotenvx
+| 特性 | dotenv | dotenvx |
+|------|--------|---------|
+| 安装难度 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| 功能丰富度 | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| 多环境支持 | ❌ | ✅ |
+| 加密功能 | ❌ | ✅ |
+| 验证功能 | ❌ | ✅ |
+| 社区支持 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+
+**推荐使用场景：**
+: 小ten需要高级功能
+
+### 其他主流工具
+- **dotenv-cli**: 命令行工具，支持跨平台操作
+- **dotenv-expand**: 支持变量扩展和引用
+- **config**: 功能丰富的配置管理库
+- **envalid**: 专门用于环境变量验证
 
 ## 前置条件
 - 已安装 Node.js（版本 14.0 或以上）
@@ -112,15 +180,17 @@ dotenv 是一个用于管理环境变量的工具，可以让我们把敏感信�
 
 ## 详细步骤
 
-### 步骤 1: 安装 dotenv 包
+### 方案一：使用 dotenv（推荐新手）
+
+#### 步骤 1: 安装 dotenv 包
 1. 打开终端，进入项目目录
 2. 执行安装命令：
    ```bash
    npm install dotenv
-```
+   ```
 3. 预期结果：看到 `dotenv` 出现在 `package.json` 的 `dependencies` 中
 
-### 步骤 2: 创建环境变量文件
+#### 步骤 2: 创建环境变量文件
 1. 在项目根目录创建 `.env` 文件
 2. 在文件中添加环境变量：
    ```
@@ -130,7 +200,7 @@ dotenv 是一个用于管理环境变量的工具，可以让我们把敏感信�
    ```
 3. 注意：不要使用引号包围值
 
-### 步骤 3: 配置 .gitignore
+#### 步骤 3: 配置 .gitignore
 1. 打开项目根目录的 `.gitignore` 文件
 2. 添加以下内容：
    ```
@@ -140,7 +210,7 @@ dotenv 是一个用于管理环境变量的工具，可以让我们把敏感信�
    ```
 3. 这样做的原因：防止敏感信息被提交到代码仓库
 
-### 步骤 4: 在代码中使用
+#### 步骤 4: 在代码中使用
 1. 在项目的主文件（如 `app.js` 或 `index.js`）顶部添加：
    ```javascript
    require('dotenv').config();
@@ -150,6 +220,31 @@ dotenv 是一个用于管理环境变量的工具，可以让我们把敏感信�
    const port = process.env.PORT || 3000;
    const dbUrl = process.env.DATABASE_URL;
    ```
+
+### 方案二：使用 dotenvx（推荐生产环境）
+
+#### 步骤 1: 安装 dotenvx
+```bash
+npm install dotenvx
+```
+
+#### 步骤 2: 创建多环境配置
+1. 创建 `.env.example` 作为模板
+2. 创建 `.env.development` 和 `.env.production`
+3. 使用 dotenvx 的加密功能：
+   ```bash
+   npx dotenvx encrypt .env.production
+   ```
+
+#### 步骤 3: 在代码中使用
+```javascript
+const { config } = require('dotenvx');
+
+// 根据环境加载配置
+config({
+  path: `.env.${process.env.NODE_ENV || 'development'}`
+});
+```
 
 ## 验证方法
 1. 启动项目：`node app.js`
@@ -161,18 +256,27 @@ dotenv 是一个用于管理环境变量的工具，可以让我们把敏感信�
 A: 确保在代码最开始就调用了 `require('dotenv').config()`，并且 `.env` 文件在项目根目录。
 
 **Q: 可以创建多个环境文件吗？**
-A: 可以，比如 `.env.development`、`.env.production`，但需要在代码中指定文件名。
+A: 可以，dotenvx 原生支持多环境，dotenv 需要手动实现。
+
+**Q: 如何保护敏感信息？**
+A: 使用 dotenvx 的加密功能，或者使用专门的密钥管理服务。
 
 ## 参考资料
-- [dotenv 官方文档](mdc:https:/github.com/motdotla/dotenv)
-- [Node.js 环境变量最佳实践](mdc:https:/nodejs.org/en/docs/guides/environment-variables)
-- [Git 忽略文件配置](mdc:https:/git-scm.com/docs/gitignore)
+- [dotenv 官方文档](https://github.com/motdotla/dotenv)
+- [dotenvx 官方文档](https://github.com/dotenvx/dotenvx)
+- [Node.js 环境变量最佳实践](https://nodejs.org/en/docs/guides/environment-variables)
+- [Git 忽略文件配置](https://git-scm.com/docs/gitignore)
 
 ## 下一步学习
 - 学习使用 `dotenv-expand` 进行变量扩展
-- 了解不同环境的配置管理
+- 了解不同环境的配置管理策略
 - 学习使用 `config` 库进行更复杂的配置管理
+- 探索密钥管理服务（如 AWS Secrets Manager）
 ```
 
 ## 执行指令
-每次对话结束后，请按照以上规则和模板，将对话内容整理成一份完整的 Markdown 文档，确保非技术人员也能按照步骤成功操作。
+每次对话结束后，请按照以上规则和模板，将对话内容整理成一份完整的 Markdown 文档，确保：
+1. 包含主流工具对比
+2. 提供多个解决方案
+3. 非技术人员也能按照步骤成功操作
+4. 给出进阶学习建议 
