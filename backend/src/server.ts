@@ -1,14 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import {
-  getAllTodos,
-  getTodoById,
-  createTodo,
-  updateTodo,
-  patchTodo,
-  deleteTodo
-} from './controller/TodoController';
+import routes from './routes';
 
 // 加载环境变量
 dotenv.config();
@@ -22,23 +15,8 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// 【查】获取所有待办事项 - GET /api/todos
-app.get('/api/todos', getAllTodos);
-
-// 【查】获取单个待办事项 - GET /api/todos/:id
-app.get('/api/todos/:id', getTodoById);
-
-// 【增】创建待办事项 - POST /api/todos
-app.post('/api/todos', createTodo);
-
-// 【改】完整更新待办事项 - PUT /api/todos/:id
-app.put('/api/todos/:id', updateTodo);
-
-// 【改】部分更新待办事项 - PATCH /api/todos/:id
-app.patch('/api/todos/:id', patchTodo);
-
-// 【删】删除待办事项 - DELETE /api/todos/:id
-app.delete('/api/todos/:id', deleteTodo);
+// 使用 API 路由
+app.use('/api', routes);
 
 // 简单的 GET /welcome 路由 - Express 5 版本
 app.get('/welcome', (req: Request, res: Response) => {
