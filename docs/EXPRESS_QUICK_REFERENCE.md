@@ -2,43 +2,28 @@
 
 ## 📋 常用命令
 
-### 开发环境
 ```bash
-# 启动开发服务器（自动重启）
-pnpm run dev
+# 开发
+pnpm run dev          # 启动开发服务器
+pnpm run dev:debug    # 调试模式
+pnpm start            # 生产环境
 
-# 启动调试模式
-pnpm run dev:debug
-
-# 生产环境启动
-pnpm start
-
-# 安装依赖
+# 依赖
 pnpm add express cors
 pnpm add -D nodemon
-```
 
-### 测试 API
-```bash
-# 测试 GET 请求
-curl http://localhost:3001/
-curl http://localhost:3001/welcome
-
-# 测试 POST 请求
-curl -X POST http://localhost:3001/api/todos \
-  -H "Content-Type: application/json" \
-  -d '{"text": "新任务"}'
-
-# 检查端口占用
-lsof -i :3001
-lsof -i :9229
+# 测试 API
+curl http://localhost:3001/api/todos
+curl -X POST http://localhost:3001/api/todos -H "Content-Type: application/json" -d '{"text": "任务"}'
+curl -X PATCH http://localhost:3001/api/todos/123 -H "Content-Type: application/json" -d '{"completed": true}'
+curl -X DELETE http://localhost:3001/api/todos/123
 ```
 
 ---
 
 ## 🔧 基础代码模板
 
-### 1. 服务器设置
+### 服务器设置
 ```javascript
 import express from 'express';
 import cors from 'cors';
@@ -46,110 +31,50 @@ import cors from 'cors';
 const app = express();
 const PORT = 3001;
 
-// 中间件
 app.use(cors());
 app.use(express.json());
 
-// 启动服务器
 app.listen(PORT, () => {
   console.log(`🚀 服务器运行在 http://localhost:${PORT}`);
 });
 ```
 
-### 2. GET 路由
+### 路由模板
 ```javascript
+// GET - 获取数据
 app.get('/api/todos', async (req, res) => {
   try {
-    const data = await readFile('./data.json', 'utf8');
-    const todos = JSON.parse(data);
-    res.json({
-      success: true,
-      data: todos,
-      count: todos.length
-    });
+    // 处理逻辑
+    res.json({ data: todos });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    res.status(500).json({ error: error.message });
   }
 });
-```
 
-### 3. POST 路由
-```javascript
+// POST - 创建数据
 app.post('/api/todos', async (req, res) => {
   try {
     const { text } = req.body;
-    
-    if (!text || text.trim().length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: '待办事项内容不能为空'
-      });
-    }
-    
-    const newTodo = {
-      id: Date.now(),
-      text: text.trim(),
-      completed: false
-    };
-    
-    // 保存到文件或数据库
-    res.status(201).json({
-      success: true,
-      data: newTodo
-    });
+    // 创建逻辑
+    res.status(201).json({ data: newTodo });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    res.status(500).json({ error: error.message });
   }
 });
-```
 
-### 4. PUT 路由
-```javascript
+// PUT - 完整更新
 app.put('/api/todos/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { text, completed } = req.body;
-    
-    // 更新逻辑
-    const updatedTodo = { id: parseInt(id), text, completed };
-    
-    res.json({
-      success: true,
-      data: updatedTodo
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
+  // 需要所有字段
 });
-```
 
-### 5. DELETE 路由
-```javascript
+// PATCH - 部分更新
+app.patch('/api/todos/:id', async (req, res) => {
+  // 只需修改字段
+});
+
+// DELETE - 删除
 app.delete('/api/todos/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    // 删除逻辑
-    
-    res.json({
-      success: true,
-      message: '删除成功'
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
+  // 删除逻辑
 });
 ```
 
@@ -157,120 +82,82 @@ app.delete('/api/todos/:id', async (req, res) => {
 
 ## 🛠️ 中间件模板
 
-### 1. 日志中间件
 ```javascript
+// 日志中间件
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  console.log(`${req.method} ${req.path}`);
   next();
 });
-```
 
-### 2. 错误处理中间件
-```javascript
+// 错误处理中间件
 app.use((err, req, res, next) => {
-  console.error('错误:', err.stack);
-  res.status(500).json({
-    success: false,
-    error: '服务器内部错误',
-    message: err.message,
-    timestamp: new Date().toISOString()
-  });
+  res.status(500).json({ error: err.message });
 });
-```
 
-### 3. 验证中间件
-```javascript
+// 验证中间件
 const validateTodo = (req, res, next) => {
-  const { text } = req.body;
-  if (!text || text.trim().length === 0) {
-    return res.status(400).json({
-      success: false,
-      error: '待办事项内容不能为空'
-    });
+  if (!req.body.text) {
+    return res.status(400).json({ error: '内容不能为空' });
   }
   next();
 };
-
-// 使用
-app.post('/api/todos', validateTodo, async (req, res) => {
-  // 处理逻辑
-});
 ```
 
 ---
 
+## 🔄 RESTful API
+
+| 操作 | 方法 | 路径 |
+|------|------|------|
+| 获取所有 | GET | `/api/todos` |
+| 获取单个 | GET | `/api/todos/:id` |
+| 创建 | POST | `/api/todos` |
+| 完整更新 | PUT | `/api/todos/:id` |
+| 部分更新 | PATCH | `/api/todos/:id` |
+| 删除 | DELETE | `/api/todos/:id` |
+
+**PUT vs PATCH**: PUT需要所有字段，PATCH只需修改字段
+
 ## 📊 响应格式
 
-### 成功响应
 ```javascript
-{
-  "success": true,
-  "data": [...],
-  "count": 3,
-  "timestamp": "2024-01-01T00:00:00.000Z"
-}
-```
+// 成功
+{ "data": [...], "message": "成功" }
 
-### 错误响应
-```javascript
-{
-  "success": false,
-  "error": "错误描述",
-  "message": "详细错误信息",
-  "timestamp": "2024-01-01T00:00:00.000Z"
-}
+// 错误  
+{ "error": "错误描述" }
 ```
 
 ---
 
 ## 🔍 调试技巧
 
-### 1. 查看请求信息
 ```javascript
+// 查看请求信息
 app.use((req, res, next) => {
-  console.log('请求体:', req.body);
-  console.log('查询参数:', req.query);
-  console.log('路径参数:', req.params);
+  console.log(`${req.method} ${req.path}`, req.body);
   next();
 });
-```
 
-### 2. 环境变量
-```javascript
+// 环境变量
 const PORT = process.env.PORT || 3001;
-const NODE_ENV = process.env.NODE_ENV || 'development';
 ```
 
-### 3. 调试模式启动
-```bash
-# 使用 nodemon 调试
-pnpm run dev:debug
+## 📚 状态码
 
-# 在 Chrome 中打开 chrome://inspect
-npm run dev:chrome
-```
-
----
-
-## 📚 常用状态码
-
-- `200` - OK (成功)
-- `201` - Created (创建成功)
-- `400` - Bad Request (请求错误)
-- `401` - Unauthorized (未授权)
-- `404` - Not Found (资源不存在)
-- `500` - Internal Server Error (服务器错误)
-
----
+- `200` - 成功
+- `201` - 创建成功  
+- `400` - 请求错误
+- `404` - 资源不存在
+- `500` - 服务器错误
 
 ## 🎯 最佳实践
 
-1. **始终使用 try-catch** 处理异步操作
-2. **统一响应格式** 便于前端处理
-3. **添加适当的日志** 便于调试
-4. **验证输入数据** 确保数据安全
-5. **使用环境变量** 管理配置
-6. **遵循 RESTful 设计** 规范 API
+- 使用 try-catch 处理异步
+- 统一响应格式
+- 验证输入数据
+- 遵循 RESTful 设计
+- 正确使用 HTTP 方法
 
 ---
 

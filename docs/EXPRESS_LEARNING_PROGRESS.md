@@ -93,37 +93,93 @@
 - [x] **Fetch API 集成**
   ```javascript
   const fetchTodos = async () => {
-    const response = await fetch('http://localhost:3001/');
+    const response = await fetch('http://localhost:3001/api/todos');
     const result = await response.json();
     setTodos(result.data || []);
   };
   ```
 
-- [ ] **错误处理和加载状态**
+- [x] **错误处理和加载状态**
   - 添加 loading 状态管理
   - 实现错误提示和重试功能
+  - 完整的错误边界处理
 
 ---
+
+### ✅ 最新完成
+
+#### 6. RESTful API 设计与实现
+- [x] **API 路由重构**
+  - 将混合式 API 改为标准 RESTful 风格
+  - 使用正确的 HTTP 方法：GET、POST、PUT、PATCH、DELETE
+  - 统一的资源路径：`/api/todos`
+
+- [x] **完整的 CRUD API**
+  ```javascript
+  // 获取所有待办事项
+  GET /api/todos
+  
+  // 获取单个待办事项
+  GET /api/todos/:id
+  
+  // 创建待办事项
+  POST /api/todos
+  
+  // 完整更新待办事项
+  PUT /api/todos/:id
+  
+  // 部分更新待办事项
+  PATCH /api/todos/:id
+  
+  // 删除待办事项
+  DELETE /api/todos/:id
+  ```
+
+- [x] **PUT vs PATCH 区别实现**
+  - **PUT**: 完整更新，需要提供所有字段
+  - **PATCH**: 部分更新，只需提供要修改的字段
+  - 前端使用 PATCH 进行状态切换和文本编辑
+
+- [x] **数据持久化**
+  - 文件系统操作 (`fs/promises`)
+  - 数据验证和错误处理
+  - 统一的响应格式
+
+- [x] **前端 API 调用更新**
+  - 更新所有 API 端点为 RESTful 风格
+  - 使用 PATCH 方法进行部分更新
+  - 完善的错误处理和用户反馈
+
+#### 7. 错误处理与数据验证
+- [x] **输入验证**
+  - 待办事项内容不能为空
+  - ID 参数验证
+  - 请求体数据验证
+
+- [x] **错误边界处理**
+  - 404 错误：资源不存在
+  - 400 错误：请求参数错误
+  - 500 错误：服务器内部错误
+
+- [x] **统一响应格式**
+  ```javascript
+  // 成功响应
+  {
+    "data": [...],
+    "message": "操作成功",
+    "timestamp": "2024-..."
+  }
+  
+  // 错误响应
+  {
+    "error": "错误描述",
+    "message": "详细错误信息"
+  }
+  ```
 
 ### 🔄 进行中
 
-Apifox 使用: 
-
-#### 6. 完整的 CRUD API
-- [ ] **POST 路由 - 创建数据**
-- [ ] **PUT 路由 - 更新数据**
-- [ ] **DELETE 路由 - 删除数据**
-
-#### 7. 数据持久化
-- [ ] **文件系统操作**
-- [ ] **数据验证**
-- [ ] **错误边界处理**
-
----
-
-### 📝 待学习
-
-#### 8. 高级特性
+#### 8. 高级特性开发
 - [ ] **中间件开发**
   - 自定义中间件
   - 中间件链
@@ -138,14 +194,18 @@ Apifox 使用:
   - 路径参数 (`req.params`)
   - 请求体 (`req.body`)
 
+---
+
+### 📝 待学习
+
 #### 9. 数据库集成
 - [ ] **SQLite 集成**
 - [ ] **MongoDB 集成**
 - [ ] **数据模型设计**
 
 #### 10. 安全与性能
-- [ ] **输入验证**
-- [ ] **CORS 配置**
+- [x] **CORS 配置**
+- [ ] **输入验证增强**
 - [ ] **速率限制**
 - [ ] **日志记录**
 
@@ -174,8 +234,19 @@ pnpm start
 lsof -i :3001
 
 # 测试 API
-curl http://localhost:3001/
+curl http://localhost:3001/api/todos
 curl http://localhost:3001/welcome
+
+# 测试 CRUD 操作
+curl -X POST http://localhost:3001/api/todos \
+  -H "Content-Type: application/json" \
+  -d '{"text": "测试待办事项", "completed": false}'
+
+curl -X PATCH http://localhost:3001/api/todos/1234567890 \
+  -H "Content-Type: application/json" \
+  -d '{"completed": true}'
+
+curl -X DELETE http://localhost:3001/api/todos/1234567890
 
 # 检查调试端口
 lsof -i :9229
@@ -190,7 +261,7 @@ lsof -i :9229
 - [Express 5.x 新特性](https://expressjs.com/en/5x/api.html)
 
 ### 实践项目
-- [ ] TODO API 完整实现
+- [x] TODO API 完整实现 (RESTful 风格)
 - [ ] 用户管理系统
 - [ ] 文件上传服务
 - [ ] 实时聊天应用
@@ -199,21 +270,16 @@ lsof -i :9229
 
 ## 🎯 下一步计划
 
-1. **完善 CRUD 操作** - 实现完整的增删改查 API
-2. **数据验证** - 添加输入验证和错误处理
-3. **路由模块化** - 将路由分离到独立文件
-4. **数据库集成** - 使用真实数据库替代 JSON 文件
-5. **API 文档** - 使用 Swagger 生成 API 文档
+1. **路由模块化** - 将路由分离到独立文件
+2. **数据库集成** - 使用真实数据库替代 JSON 文件
+3. **API 文档** - 使用 Swagger 生成 API 文档
+4. **中间件开发** - 自定义中间件和中间件链
+5. **性能优化** - 添加缓存和速率限制
 
 ---
 
 ## 📊 学习统计
 
-- **开始时间**: 2024年
-- **当前进度**: 基础搭建完成 (30%)
-- **掌握概念**: 服务器创建、基础路由、中间件、错误处理
-- **待掌握**: CRUD 操作、数据库集成、高级特性
-
----
-
-*最后更新: 2024年* 
+- **当前进度**: RESTful API 完整实现 (70%)
+- **掌握概念**: 服务器创建、基础路由、中间件、错误处理、CRUD 操作、RESTful API 设计
+- **待掌握**: 路由模块化、数据库集成、高级特性、性能优化

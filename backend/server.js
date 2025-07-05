@@ -9,7 +9,7 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
-// 【查】询待办事项
+// 【查】获取所有待办事项 - GET /api/todos
 app.get('/api/todos', async (req, res) => {
   try {
     const data = await fs.readFile('./data.json', 'utf8');
@@ -28,9 +28,35 @@ app.get('/api/todos', async (req, res) => {
   }
 });
 
+// 【查】获取单个待办事项 - GET /api/todos/:id
+app.get('/api/todos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = await fs.readFile('./data.json', 'utf8');
+    const todos = JSON.parse(data);
+    const todo = todos.find(todo => todo.id === parseInt(id));
+    
+    if (!todo) {
+      return res.status(404).json({ 
+        error: '待办事项不存在' 
+      });
+    }
+    
+    res.status(200).json({
+      data: todo,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('获取待办事项失败:', error);
+    res.status(500).json({
+      error: '获取待办事项失败',
+      message: error.message
+    });
+  }
+});
 
-// 【增】待办事项
-app.post('/api/todos/add', async (req, res) => {
+// 【增】创建待办事项 - POST /api/todos
+app.post('/api/todos', async (req, res) => {
   try {
     const { text, completed = false } = req.body;
     if (!text || text.trim() === '') {
@@ -57,51 +83,128 @@ app.post('/api/todos/add', async (req, res) => {
     await fs.writeFile('./data.json', JSON.stringify(todos, null, 2));
     
     res.status(201).json({ 
-      code: 200, 
-      message: '待办事项添加成功',
+      message: '待办事项创建成功',
       data: newTodo 
     });
   } catch (error) {
-    console.error('添加待办事项失败:', error);
+    console.error('创建待办事项失败:', error);
     res.status(500).json({ 
-      error: '添加待办事项失败',
+      error: '创建待办事项失败',
       message: error.message 
     });
   }
 });
 
-// 【删】待办事项
-app.post('/api/todos/delete/:id', async (req, res) => {
-  const { id } = req.params;
-  const data = await fs.readFile('./data.json', 'utf8');
-  const todos = JSON.parse(data);
-  const todo = todos.find(todo => todo.id === parseInt(id));
-  if (!todo) {
-    return res.status(200).json({ code: 0, error: '待办事项不存在' });
+// 【改】完整更新待办事项 - PUT /api/todos/:id
+app.put('/api/todos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { text, completed } = req.body;
+    
+    // PUT 需要提供完整的资源数据
+    if (text === undefined || completed === undefined) {
+      return res.status(400).json({ 
+        error: 'PUT 请求需要提供完整的资源数据（text 和 completed）' 
+      });
+    }
+    
+    const data = await fs.readFile('./data.json', 'utf8');
+    const todos = JSON.parse(data);
+    const todoIndex = todos.findIndex(todo => todo.id === parseInt(id));
+    
+    if (todoIndex === -1) {
+      return res.status(404).json({ 
+        error: '待办事项不存在' 
+      });
+    }
+    
+    // 完整替换待办事项
+    todos[todoIndex] = {
+      id: parseInt(id),
+      text: text.trim(),
+      completed: completed
+    };
+    
+    await fs.writeFile('./data.json', JSON.stringify(todos, null, 2));
+    res.status(200).json({ 
+      message: '待办事项完整更新成功',
+      data: todos[todoIndex]
+    });
+  } catch (error) {
+    console.error('更新待办事项失败:', error);
+    res.status(500).json({ 
+      error: '更新待办事项失败',
+      message: error.message 
+    });
   }
-  const filteredTodos = todos.filter(todo => todo.id != id);
-  await fs.writeFile('./data.json', JSON.stringify(filteredTodos, null, 2));
-  res.status(200).json({ code: 200, message: '待办事项删除成功' });
 });
 
-// 【改】待办事项
-app.post('/api/todos/update/:id', async (req, res) => {
-  const { id } = req.params;
-  const data = await fs.readFile('./data.json', 'utf8');
-  const todos = JSON.parse(data);
-  const todo = todos.find(todo => todo.id === parseInt(id));
-  if (!todo) {
-    return res.status(200).json({ code: 0, error: '待办事项不存在' });
+// 【改】部分更新待办事项 - PATCH /api/todos/:id
+app.patch('/api/todos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { text, completed } = req.body;
+    
+    const data = await fs.readFile('./data.json', 'utf8');
+    const todos = JSON.parse(data);
+    const todoIndex = todos.findIndex(todo => todo.id === parseInt(id));
+    
+    if (todoIndex === -1) {
+      return res.status(404).json({ 
+        error: '待办事项不存在' 
+      });
+    }
+    
+    // 只更新提供的字段
+    if (text !== undefined) {
+      todos[todoIndex].text = text.trim();
+    }
+    if (completed !== undefined) {
+      todos[todoIndex].completed = completed;
+    }
+    
+    await fs.writeFile('./data.json', JSON.stringify(todos, null, 2));
+    res.status(200).json({ 
+      message: '待办事项部分更新成功',
+      data: todos[todoIndex]
+    });
+  } catch (error) {
+    console.error('更新待办事项失败:', error);
+    res.status(500).json({ 
+      error: '更新待办事项失败',
+      message: error.message 
+    });
   }
-  // 只有非 undefined 值才更新
-  if (req.body.text !== undefined) {
-    todo.text = req.body.text;
+});
+
+// 【删】删除待办事项 - DELETE /api/todos/:id
+app.delete('/api/todos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = await fs.readFile('./data.json', 'utf8');
+    const todos = JSON.parse(data);
+    const todoIndex = todos.findIndex(todo => todo.id === parseInt(id));
+    
+    if (todoIndex === -1) {
+      return res.status(404).json({ 
+        error: '待办事项不存在' 
+      });
+    }
+    
+    const deletedTodo = todos.splice(todoIndex, 1)[0];
+    await fs.writeFile('./data.json', JSON.stringify(todos, null, 2));
+    
+    res.status(200).json({ 
+      message: '待办事项删除成功',
+      data: deletedTodo
+    });
+  } catch (error) {
+    console.error('删除待办事项失败:', error);
+    res.status(500).json({ 
+      error: '删除待办事项失败',
+      message: error.message 
+    });
   }
-  if (req.body.completed !== undefined) {
-    todo.completed = req.body.completed;
-  }
-  await fs.writeFile('./data.json', JSON.stringify(todos, null, 2));
-  res.status(200).json({ code: 200, message: '待办事项更新成功' });
 });
 
 // 简单的 GET / 路由 - Express 5 版本
@@ -133,6 +236,13 @@ app.use((err, req, res, next) => {
 // 启动服务器
 app.listen(PORT, () => {
   console.log(`🚀 Express 5 服务器运行在 http://localhost:${PORT}`);
-  console.log(`📝 访问 GET / 路由查看欢迎信息`);
+  console.log(`📝 访问 GET /welcome 路由查看欢迎信息`);
   console.log(`✨ 使用 Express 5 的新特性！`);
+  console.log(`🔄 RESTful API 端点:`);
+  console.log(`   GET    /api/todos     - 获取所有待办事项`);
+  console.log(`   GET    /api/todos/:id - 获取单个待办事项`);
+  console.log(`   POST   /api/todos     - 创建待办事项`);
+  console.log(`   PUT    /api/todos/:id - 完整更新待办事项`);
+  console.log(`   PATCH  /api/todos/:id - 部分更新待办事项`);
+  console.log(`   DELETE /api/todos/:id - 删除待办事项`);
 }); 

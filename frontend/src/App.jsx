@@ -44,24 +44,28 @@ function App() {
 
     setInputValue('');
 
-    // setTodos([...todos, newTodo])
-    const response = await fetch(`http://localhost:3001/api/todos/add`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newTodo)
-    });
+    try {
+      const response = await fetch(`http://localhost:3001/api/todos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newTodo)
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('创建成功:', result);
+
+      // 重新获取数据以更新列表
+      await refreshTodos();
+    } catch (error) {
+      console.error('创建待办事项失败:', error);
+      setError('创建待办事项失败，请重试');
     }
-
-    const result = await response.json();
-    console.log('添加成功:', result);
-
-    // 重新获取数据以更新列表
-    await refreshTodos();
   }
 
   // 处理回车键添加
@@ -73,26 +77,35 @@ function App() {
 
   // 切换待办事项状态
   const toggleTodo = async (id, checked) => {
-    // setTodos(todos.map(todo =>
-    await fetch(`http://localhost:3001/api/todos/update/${id}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ completed: checked })
-    });
+    try {
+      await fetch(`http://localhost:3001/api/todos/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ completed: checked })
+      });
 
-    await refreshTodos()
+      await refreshTodos()
+    } catch (error) {
+      console.error('更新待办事项失败:', error);
+      setError('更新待办事项失败，请重试');
+    }
   }
 
   // 删除待办事项
   const deleteTodo = async (id) => {
-    // 发送删除请求
-    await fetch(`http://localhost:3001/api/todos/delete/${id}`, {
-      method: 'POST',
-    });
-    // 删除成功后，更新待办事项列表
-    await refreshTodos()
+    try {
+      // 发送删除请求
+      await fetch(`http://localhost:3001/api/todos/${id}`, {
+        method: 'DELETE',
+      });
+      // 删除成功后，更新待办事项列表
+      await refreshTodos()
+    } catch (error) {
+      console.error('删除待办事项失败:', error);
+      setError('删除待办事项失败，请重试');
+    }
   }
 
   // 开始编辑待办事项
@@ -104,17 +117,22 @@ function App() {
   // 保存编辑
   const saveEdit = async (id) => {
     if (editValue.trim() === '') return;
-    await fetch(`http://localhost:3001/api/todos/update/${id}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ text: editValue.trim() })
-    });
+    try {
+      await fetch(`http://localhost:3001/api/todos/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: editValue.trim() })
+      });
 
-    setEditingId(null);
-    setEditValue('');
-    await refreshTodos()
+      setEditingId(null);
+      setEditValue('');
+      await refreshTodos()
+    } catch (error) {
+      console.error('保存编辑失败:', error);
+      setError('保存编辑失败，请重试');
+    }
   }
 
   // 取消编辑
