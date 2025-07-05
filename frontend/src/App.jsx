@@ -22,11 +22,15 @@ function App() {
       console.error('获取待办事项失败:', err)
       setError('获取数据失败，请检查后端服务是否运行')
     }
+  };
+
+  const refreshTodos = async () => {
+    await fetchTodos()
   }
 
   // 组件加载时获取数据
   useEffect(() => {
-    fetchTodos()
+    refreshTodos()
   }, [])
 
   // 添加新的待办事项
@@ -57,7 +61,7 @@ function App() {
     console.log('添加成功:', result);
 
     // 重新获取数据以更新列表
-    await fetchTodos();
+    await refreshTodos();
   }
 
   // 处理回车键添加
@@ -78,15 +82,17 @@ function App() {
       body: JSON.stringify({ completed: checked })
     });
 
-    await fetchTodos()
+    await refreshTodos()
   }
 
   // 删除待办事项
   const deleteTodo = async (id) => {
     // 发送删除请求
-    await fetch(`http://localhost:3001/api/todos/delete/${id}`);
+    await fetch(`http://localhost:3001/api/todos/delete/${id}`, {
+      method: 'POST',
+    });
     // 删除成功后，更新待办事项列表
-    await fetchTodos()
+    await refreshTodos()
   }
 
   // 开始编辑待办事项
@@ -96,14 +102,19 @@ function App() {
   }
 
   // 保存编辑
-  const saveEdit = (id) => {
-    if (editValue.trim() === '') return
+  const saveEdit = async (id) => {
+    if (editValue.trim() === '') return;
+    await fetch(`http://localhost:3001/api/todos/update/${id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text: editValue.trim() })
+    });
 
-    setTodos(todos.map(todo =>
-      todo.id === id ? { ...todo, text: editValue.trim() } : todo
-    ))
-    setEditingId(null)
-    setEditValue('')
+    setEditingId(null);
+    setEditValue('');
+    await refreshTodos()
   }
 
   // 取消编辑
@@ -137,7 +148,7 @@ function App() {
         }}>
           {error}
           <button
-            onClick={fetchTodos}
+            onClick={refreshTodos}
             style={{
               marginLeft: '10px',
               padding: '5px 10px',
@@ -193,7 +204,6 @@ function App() {
                     value={editValue}
                     onChange={(e) => setEditValue(e.target.value)}
                     onKeyPress={(e) => handleEditKeyPress(e, todo.id)}
-                    onBlur={() => saveEdit(todo.id)}
                     autoFocus
                   />
                   <div className="edit-buttons">
