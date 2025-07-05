@@ -1,8 +1,11 @@
 {
-  "watch": ["server.js", "data.json"],
-  "ext": "js,json",
+  "watch": ["src/**/*", "data.json"],
+  "ext": "ts,js,json",
   "ignore": [
     "node_modules/",
+    "dist/",
+    "*.test.ts",
+    "*.spec.ts",
     "*.test.js",
     "*.spec.js",
     ".git",
@@ -17,7 +20,7 @@
   "verbose": true,
   "colours": true,
   "execMap": {
-    "js": "node"
+    "ts": "ts-node --esm"
   },
   "events": {
     "restart": "echo '🔄 服务器重启中...'",
