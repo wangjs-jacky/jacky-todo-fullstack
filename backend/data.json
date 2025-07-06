@@ -1,15 +1,17 @@
-[{
-  "id": 1,
-  "text": "学习 React 基础1",
-  "completed": false
-},
-{
-  "id": 2,
-  "text": "学习 Express.js",
-  "completed": false
-},
-{
-  "id": 3,
-  "text": "完成 TODO 应用",
-  "completed": true
-}]
+[
+  {
+    "id": 1,
+    "text": "学习 React 基础1",
+    "completed": false
+  },
+  {
+    "id": 2,
+    "text": "学习 Express.js",
+    "completed": false
+  },
+  {
+    "id": 3,
+    "text": "完成 TODO 应用",
+    "completed": true
+  }
+]

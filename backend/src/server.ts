@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import routes from './routes';
+import routes from './routes/index.js';
 
 // 加载环境变量
 dotenv.config();

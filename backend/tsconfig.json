@@ -1,13 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "esnext",
     "module": "ESNext",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "allowJs": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": false,
@@ -29,8 +28,7 @@
     "tsBuildInfoFile": "./dist/.tsbuildinfo"
   },
   "include": [
-    "src/**/*",
-    "scripts/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",

@@ -6,7 +6,7 @@ import {
   updateTodo,
   patchTodo,
   deleteTodo
-} from '../controller/TodoController';
+} from '../controller/TodoControllerPrisma.js';
 
 const router: Router = Router();
 

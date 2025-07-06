@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import todoRoutes from './todoRoutes';
+import todoRoutes from './todoRoutes.js';
 
-const router = Router();
+const router: Router = Router();
 
 // 注册所有路由模块
 router.use('/todos', todoRoutes);
