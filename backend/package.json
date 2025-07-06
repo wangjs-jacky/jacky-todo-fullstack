@@ -5,15 +5,22 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "npx prisma generate && tsc",
     "dev": "nodemon",
     "dev:chrome": "nodemon --inspect",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "db:migrate": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "test:prisma": "node scripts/test-prisma.js"
   },
   "dependencies": {
+    "@prisma/client": "^6.11.1",
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "prisma": "^6.11.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

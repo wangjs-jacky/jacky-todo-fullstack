@@ -1,0 +1,22 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// 生成器配置
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 数据源配置
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 数据模型
+model Todo {
+  id        Int     @id @map("id")
+  text      String  @map("text")
+  completed Boolean @map("completed")
+
+  @@map("todo")
+}
