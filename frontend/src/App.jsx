@@ -6,6 +6,7 @@ function App() {
   const [editingId, setEditingId] = useState(null)
   const [editValue, setEditValue] = useState('')
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState(null)
 
   // 从后端获取待办事项数据
@@ -20,12 +21,22 @@ function App() {
       setTodos(result.data || [])
     } catch (err) {
       console.error('获取待办事项失败:', err)
-      setError('获取数据失败，请检查后端服务是否运行')
+      setError('获取数据失败，请检查后端服务是否运行');
     }
   };
 
   const refreshTodos = async () => {
-    await fetchTodos()
+    if (todos.length === 0) {
+      setLoading(true)
+    } else {
+      setRefreshing(true)
+    }
+    try {
+      await fetchTodos()
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
   }
 
   // 组件加载时获取数据
@@ -198,74 +209,90 @@ function App() {
       </div>
 
       {/* 待办事项列表 */}
-      <ul className="todo-list">
-        {!loading && todos.length === 0 ? (
-          <li className="empty-state">暂无待办事项，添加一个吧！</li>
+      <div className="todo-list-container">
+        {loading ? (
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <span>加载中...</span>
+          </div>
+        ) : todos.length === 0 ? (
+          <div className="empty-state">暂无待办事项，添加一个吧！</div>
         ) : (
-          todos.map(todo => (
-            <li key={todo.id} className="todo-item">
-              <input
-                type="checkbox"
-                className="todo-checkbox"
-                checked={todo.completed}
-                onChange={(e) => {
-                  toggleTodo(todo.id, e.target.checked)
-                }}
-              />
-
-              {/* 显示文本或编辑输入框 */}
-              {editingId === todo.id ? (
-                <div className="edit-container">
-                  <input
-                    type="text"
-                    className="edit-input"
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onKeyPress={(e) => handleEditKeyPress(e, todo.id)}
-                    autoFocus
-                  />
-                  <div className="edit-buttons">
-                    <button
-                      className="save-btn"
-                      onClick={() => saveEdit(todo.id)}
-                    >
-                      保存
-                    </button>
-                    <button
-                      className="cancel-btn"
-                      onClick={cancelEdit}
-                    >
-                      取消
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <span
-                  className={`todo-text ${todo.completed ? 'completed' : ''}`}
-                  onDoubleClick={() => startEdit(todo)}
-                >
-                  {todo.text}
-                </span>
-              )}
-
-              <div className="action-buttons">
-                <button
-                  className="edit-btn"
-                  onClick={() => startEdit(todo)}
-                >
-                  编辑
-                </button>
-                <button
-                  className="delete-btn"
-                  onClick={() => deleteTodo(todo.id)}
-                >
-                  删除
-                </button>
+          <ul className="todo-list">
+            {/* 刷新蒙层 */}
+            {refreshing && (
+              <div className="loading-overlay">
+                <div className="loading-spinner"></div>
+                <span>刷新中...</span>
               </div>
-            </li>
-          ))
+            )}
+            
+            {/* 待办事项列表 */}
+            {todos.map(todo => (
+              <li key={todo.id} className="todo-item">
+                <input
+                  type="checkbox"
+                  className="todo-checkbox"
+                  checked={todo.completed}
+                  onChange={(e) => {
+                    toggleTodo(todo.id, e.target.checked)
+                  }}
+                />
+
+                {/* 显示文本或编辑输入框 */}
+                {editingId === todo.id ? (
+                  <div className="edit-container">
+                    <input
+                      type="text"
+                      className="edit-input"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onKeyPress={(e) => handleEditKeyPress(e, todo.id)}
+                      autoFocus
+                    />
+                    <div className="edit-buttons">
+                      <button
+                        className="save-btn"
+                        onClick={() => saveEdit(todo.id)}
+                      >
+                        保存
+                      </button>
+                      <button
+                        className="cancel-btn"
+                        onClick={cancelEdit}
+                      >
+                        取消
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <span
+                    className={`todo-text ${todo.completed ? 'completed' : ''}`}
+                    onDoubleClick={() => startEdit(todo)}
+                  >
+                    {todo.text}
+                  </span>
+                )}
+
+                <div className="action-buttons">
+                  <button
+                    className="edit-btn"
+                    onClick={() => startEdit(todo)}
+                  >
+                    编辑
+                  </button>
+                  <button
+                    className="delete-btn"
+                    onClick={() => deleteTodo(todo.id)}
+                  >
+                    删除
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
-      </ul>
+      </div>
 
       {/* 统计信息 */}
       {todos.length > 0 && (

@@ -56,8 +56,13 @@ h1 {
   background-color: #0056b3;
 }
 
+.todo-list-container {
+  position: relative;
+}
+
 .todo-list {
   list-style: none;
+  position: relative;
 }
 
 .todo-item {
@@ -185,5 +190,53 @@ h1 {
   text-align: center;
   color: #888;
   font-style: italic;
-  padding: 20px;
+  padding: 40px 20px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* 加载状态样式 */
+.loading-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 加载蒙层样式 */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  z-index: 1000;
+  border-radius: 8px;
 } 
