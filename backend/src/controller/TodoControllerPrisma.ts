@@ -158,7 +158,7 @@ export const createTodo = async (req: Request, res: Response): Promise<void> => 
 
     const newTodo = await prisma.todo.create({
       data: {
-        id: req.body.id,
+        id: Date.now(),
         text: text.trim(),
         completed
       }
