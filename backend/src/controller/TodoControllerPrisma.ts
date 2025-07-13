@@ -5,20 +5,72 @@ import type { Todo, CreateTodoRequest, UpdateTodoRequest } from '../interface.js
 // 获取所有待办事项（支持分页）
 export const getAllTodos = async (req: Request, res: Response): Promise<void> => {
   try {
-    // 获取分页参数
+    // 获取分页和排序参数
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 5; // 默认每页5条
     const skip = (page - 1) * limit;
+    const sortBy = req.query.sortBy as string || 'updatedAt'; // 默认按更新时间排序
+    const sortOrder = req.query.sortOrder as string || 'desc'; // 默认倒序
+    const search = req.query.search as string || ''; // 搜索关键词
 
-
-    // 获取总数
-    const totalCount = await prisma.todo.count();
+    // 验证排序参数
+    const validSortFields = ['id', 'createdAt', 'updatedAt', 'text', 'completed'];
+    const validSortOrders = ['asc', 'desc'];
     
-    // 获取分页数据
+    if (!validSortFields.includes(sortBy)) {
+      res.status(400).json({ 
+        error: '无效的排序字段', 
+        validFields: validSortFields,
+        timestamp: new Date().toISOString() 
+      });
+      return;
+    }
+    
+    if (!validSortOrders.includes(sortOrder)) {
+      res.status(400).json({ 
+        error: '无效的排序顺序', 
+        validOrders: validSortOrders,
+        timestamp: new Date().toISOString() 
+      });
+      return;
+    }
+
+    // 构建搜索条件
+    const where: any = {};
+    if (search.trim()) {
+      where.text = {
+        contains: search.trim(),
+        mode: 'insensitive' // 不区分大小写
+      };
+    }
+
+    // 获取总数（包含搜索条件）
+    const totalCount = await prisma.todo.count({ where });
+    
+    // 获取已完成数量（包含搜索条件）
+    const completedCount = await prisma.todo.count({
+      where: {
+        ...where,
+        completed: true
+      }
+    });
+    
+    // 获取未完成数量（包含搜索条件）
+    const uncompletedCount = await prisma.todo.count({
+      where: {
+        ...where,
+        completed: false
+      }
+    });
+    
+    // 构建排序对象
+    const orderBy: any = {};
+    orderBy[sortBy] = sortOrder;
+    
+    // 获取分页数据（包含搜索条件）
     const todos = await prisma.todo.findMany({
-      orderBy: {
-        id: 'desc', // 按ID倒序，最新的数据在前面
-      },
+      where: where,
+      orderBy: orderBy,
       skip: skip,
       take: limit,
     });
@@ -39,6 +91,12 @@ export const getAllTodos = async (req: Request, res: Response): Promise<void> =>
         hasPrevPage: hasPrevPage,
         nextPage: hasNextPage ? page + 1 : null,
         prevPage: hasPrevPage ? page - 1 : null
+      },
+      statistics: {
+        total: totalCount,
+        completed: completedCount,
+        uncompleted: uncompletedCount,
+        currentPageCount: todos.length
       },
       timestamp: new Date().toISOString()
     });

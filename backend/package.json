@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "init:database": "node scripts/import-data.js",
+    "seed": "node scripts/import-data.js",
     "build": "npx prisma generate && tsc",
     "dev": "tsc --watch & nodemon dist/server.js",
     "dev:chrome": "tsc --watch & nodemon --inspect dist/server.js",

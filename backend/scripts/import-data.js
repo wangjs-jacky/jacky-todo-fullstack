@@ -20,11 +20,14 @@ async function importData() {
 
     // 导入新数据
     for (const todo of todos) {
+      const now = new Date()
       await prisma.todo.create({
         data: {
           id: todo.id,
           text: todo.text,
-          completed: todo.completed
+          completed: todo.completed,
+          createdAt: now,
+          updatedAt: now
         }
       })
     }

@@ -5,17 +5,22 @@ export interface Todo {
   id: number;
   text: string;
   completed: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // 请求体接口
 export interface CreateTodoRequest {
   text: string;
   completed?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface UpdateTodoRequest {
   text?: string;
   completed?: boolean;
+  updatedAt?: string;
 }
 
 // 通用 API 响应接口
