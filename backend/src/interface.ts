@@ -65,4 +65,15 @@ export interface ServerConfig {
   port: number;
   dataFile: string;
   corsOrigin: string;
+}
+
+// Express Request 类型扩展
+// https://github.com/floatdrop/express-request-id/blob/master/types.d.ts#L4-11
+declare global {
+  namespace Express {
+    // Inject additional properties on express.Request
+    interface Request {
+      id?: string;
+    }
+  }
 } 

@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import prisma from '../lib/prisma.js';
 import type { Todo, CreateTodoRequest, UpdateTodoRequest } from '../interface.js';
+import { createChildLogger } from '../lib/logger.js';
+
+const logger = createChildLogger('TodoController');
 
 // 获取所有待办事项（支持分页）
 export const getAllTodos = async (req: Request, res: Response): Promise<void> => {
@@ -101,7 +104,12 @@ export const getAllTodos = async (req: Request, res: Response): Promise<void> =>
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('读取待办事项失败:', error);
+    logger.error({
+      msg: '读取待办事项失败',
+      reqId: req.id,
+      error: error instanceof Error ? error.message : '未知错误',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     res.status(500).json({
       error: '读取数据失败',
       message: error instanceof Error ? error.message : '未知错误',
@@ -112,8 +120,9 @@ export const getAllTodos = async (req: Request, res: Response): Promise<void> =>
 
 // 获取单个待办事项
 export const getTodoById = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+  const { id } = req.params;
+  
   try {
-    const { id } = req.params;
     if (!id) {
       res.status(400).json({ error: '缺少 id 参数', timestamp: new Date().toISOString() });
       return;
@@ -130,7 +139,13 @@ export const getTodoById = async (req: Request<{ id: string }>, res: Response): 
 
     res.status(200).json({ data: todo, timestamp: new Date().toISOString() });
   } catch (error) {
-    console.error('获取待办事项失败:', error);
+    logger.error({
+      msg: '获取待办事项失败',
+      reqId: req.id,
+      todoId: id,
+      error: error instanceof Error ? error.message : '未知错误',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     res.status(500).json({
       error: '获取待办事项失败',
       message: error instanceof Error ? error.message : '未知错误',
@@ -141,8 +156,9 @@ export const getTodoById = async (req: Request<{ id: string }>, res: Response): 
 
 // 创建待办事项
 export const createTodo = async (req: Request, res: Response): Promise<void> => {
+  const { text, completed = false }: CreateTodoRequest = req.body;
+  
   try {
-    const { text, completed = false }: CreateTodoRequest = req.body;
     if (!text || text.trim() === '') {
       res.status(400).json({ error: '待办事项内容不能为空', timestamp: new Date().toISOString() });
       return;
@@ -162,7 +178,13 @@ export const createTodo = async (req: Request, res: Response): Promise<void> => 
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('创建待办事项失败:', error);
+    logger.error({
+      msg: '创建待办事项失败',
+      reqId: req.id,
+      todoText: text,
+      error: error instanceof Error ? error.message : '未知错误',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     res.status(500).json({
       error: '创建待办事项失败',
       message: error instanceof Error ? error.message : '未知错误',
@@ -173,14 +195,15 @@ export const createTodo = async (req: Request, res: Response): Promise<void> => 
 
 // 完整更新待办事项
 export const updateTodo = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const { text, completed }: UpdateTodoRequest = req.body;
+  
   try {
-    const { id } = req.params;
     if (!id) {
       res.status(400).json({ error: '缺少 id 参数', timestamp: new Date().toISOString() });
       return;
     }
 
-    const { text, completed }: UpdateTodoRequest = req.body;
     if (text === undefined || completed === undefined) {
       res.status(400).json({
         error: 'PUT 请求需要提供完整的资源数据（text 和 completed）',
@@ -203,7 +226,13 @@ export const updateTodo = async (req: Request<{ id: string }>, res: Response): P
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('更新待办事项失败:', error);
+    logger.error({
+      msg: '完整更新待办事项失败',
+      reqId: req.id,
+      todoId: id,
+      error: error instanceof Error ? error.message : '未知错误',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     if (error instanceof Error && error.message.includes('Record to update not found')) {
       res.status(404).json({ error: '待办事项不存在', timestamp: new Date().toISOString() });
       return;
@@ -218,14 +247,15 @@ export const updateTodo = async (req: Request<{ id: string }>, res: Response): P
 
 // 部分更新待办事项
 export const patchTodo = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const { text, completed }: UpdateTodoRequest = req.body;
+  
   try {
-    const { id } = req.params;
     if (!id) {
       res.status(400).json({ error: '缺少 id 参数', timestamp: new Date().toISOString() });
       return;
     }
 
-    const { text, completed }: UpdateTodoRequest = req.body;
     const updateData: any = {};
 
     if (text !== undefined) {
@@ -246,7 +276,13 @@ export const patchTodo = async (req: Request<{ id: string }>, res: Response): Pr
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('更新待办事项失败:', error);
+    logger.error({
+      msg: '部分更新待办事项失败',
+      reqId: req.id,
+      todoId: id,
+      error: error instanceof Error ? error.message : '未知错误',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     if (error instanceof Error && error.message.includes('Record to update not found')) {
       res.status(404).json({ error: '待办事项不存在', timestamp: new Date().toISOString() });
       return;
@@ -261,8 +297,9 @@ export const patchTodo = async (req: Request<{ id: string }>, res: Response): Pr
 
 // 删除待办事项
 export const deleteTodo = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+  const { id } = req.params;
+  
   try {
-    const { id } = req.params;
     if (!id) {
       res.status(400).json({ error: '缺少 id 参数', timestamp: new Date().toISOString() });
       return;
@@ -278,7 +315,13 @@ export const deleteTodo = async (req: Request<{ id: string }>, res: Response): P
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('删除待办事项失败:', error);
+    logger.error({
+      msg: '删除待办事项失败',
+      reqId: req.id,
+      todoId: id,
+      error: error instanceof Error ? error.message : '未知错误',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     if (error instanceof Error && error.message.includes('Record to delete does not exist')) {
       res.status(404).json({ error: '待办事项不存在', timestamp: new Date().toISOString() });
       return;
