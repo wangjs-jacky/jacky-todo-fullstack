@@ -60,9 +60,7 @@ const baseConfig = {
     req: pino.stdSerializers.req,
     res: pino.stdSerializers.res,
     err: pino.stdSerializers.err,
-  },
-  // 生成请求 ID，便于追踪
-  genReqId: (req: any) => req.id || req.headers['x-request-id'] || Math.random().toString(36).substring(2, 15),
+  }
 };
 
 // 开发环境配置：控制台美化 + 文件输出
