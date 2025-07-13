@@ -58,18 +58,14 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// 对欢迎页面和健康检查应用宽松限流
+// 对欢迎页面应用宽松限流
 app.use('/welcome', welcomeLimiter);
-app.use('/health', welcomeLimiter);
 
-// 对 API 路由应用严格限流
-app.use('/api', apiLimiter);
+// 使用 API 路由（直接应用限流）
+app.use('/api', apiLimiter, routes);
 
-// 使用 API 路由
-app.use('/api', routes);
-
-// 健康检查端点 - 用于心跳测试
-app.get('/health', (req: Request, res: Response) => {
+// 健康检查端点 - 用于心跳测试（直接应用限流）
+app.get('/health', welcomeLimiter, (req: Request, res: Response) => {
   res.json({
     status: 'healthy',
     message: '服务器运行正常',
