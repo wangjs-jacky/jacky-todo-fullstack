@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import routes from './routes/index.js';
+import { requestLogger } from './middleware/logger.js';
+import AppError from './lib/AppError.js';
 
 // 加载环境变量
 dotenv.config();
@@ -58,6 +60,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// 日志中间件
+app.use(requestLogger);
+
 // 对欢迎页面应用宽松限流
 app.use('/welcome', welcomeLimiter);
 
@@ -98,13 +103,18 @@ app.get('/welcome', (req: Request, res: Response) => {
   });
 });
 
-// Express 5 的错误处理中间件
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error('Express 5 错误处理:', err.stack);
-  res.status(500).json({
-    error: '服务器内部错误',
-    message: err.message,
-    version: 'Express 5',
+// Express 5 的全局错误处理中间件
+// 并不是所有的报错是 500 错误，比如用户传入了相同的 id 时，需要返回 400 报错
+app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
+  const {
+    statusCode = 500,
+    message = '服务器内部错误',
+  } = err;
+
+  // 自定义错误
+  res.status(statusCode).json({
+    rootMessageId: req.id,
+    error: message,
     timestamp: new Date().toISOString()
   });
 });

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../lib/prisma.js';
 import type { Todo, CreateTodoRequest, UpdateTodoRequest } from '../interface.js';
 import { createChildLogger } from '../lib/logger.js';
+import AppError from '../lib/AppError.js';
 
 const logger = createChildLogger('TodoController');
 
@@ -19,21 +20,21 @@ export const getAllTodos = async (req: Request, res: Response): Promise<void> =>
     // 验证排序参数
     const validSortFields = ['id', 'createdAt', 'updatedAt', 'text', 'completed'];
     const validSortOrders = ['asc', 'desc'];
-    
+
     if (!validSortFields.includes(sortBy)) {
-      res.status(400).json({ 
-        error: '无效的排序字段', 
+      res.status(400).json({
+        error: '无效的排序字段',
         validFields: validSortFields,
-        timestamp: new Date().toISOString() 
+        timestamp: new Date().toISOString()
       });
       return;
     }
-    
+
     if (!validSortOrders.includes(sortOrder)) {
-      res.status(400).json({ 
-        error: '无效的排序顺序', 
+      res.status(400).json({
+        error: '无效的排序顺序',
         validOrders: validSortOrders,
-        timestamp: new Date().toISOString() 
+        timestamp: new Date().toISOString()
       });
       return;
     }
@@ -49,7 +50,7 @@ export const getAllTodos = async (req: Request, res: Response): Promise<void> =>
 
     // 获取总数（包含搜索条件）
     const totalCount = await prisma.todo.count({ where });
-    
+
     // 获取已完成数量（包含搜索条件）
     const completedCount = await prisma.todo.count({
       where: {
@@ -57,7 +58,7 @@ export const getAllTodos = async (req: Request, res: Response): Promise<void> =>
         completed: true
       }
     });
-    
+
     // 获取未完成数量（包含搜索条件）
     const uncompletedCount = await prisma.todo.count({
       where: {
@@ -65,11 +66,11 @@ export const getAllTodos = async (req: Request, res: Response): Promise<void> =>
         completed: false
       }
     });
-    
+
     // 构建排序对象
     const orderBy: any = {};
     orderBy[sortBy] = sortOrder;
-    
+
     // 获取分页数据（包含搜索条件）
     const todos = await prisma.todo.findMany({
       where: where,
@@ -110,18 +111,14 @@ export const getAllTodos = async (req: Request, res: Response): Promise<void> =>
       error: error instanceof Error ? error.message : '未知错误',
       stack: error instanceof Error ? error.stack : undefined,
     });
-    res.status(500).json({
-      error: '读取数据失败',
-      message: error instanceof Error ? error.message : '未知错误',
-      timestamp: new Date().toISOString()
-    });
+    throw new AppError('读取数据失败', 500);
   }
 };
 
 // 获取单个待办事项
 export const getTodoById = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
   const { id } = req.params;
-  
+
   try {
     if (!id) {
       res.status(400).json({ error: '缺少 id 参数', timestamp: new Date().toISOString() });
@@ -146,18 +143,13 @@ export const getTodoById = async (req: Request<{ id: string }>, res: Response): 
       error: error instanceof Error ? error.message : '未知错误',
       stack: error instanceof Error ? error.stack : undefined,
     });
-    res.status(500).json({
-      error: '获取待办事项失败',
-      message: error instanceof Error ? error.message : '未知错误',
-      timestamp: new Date().toISOString()
-    });
+    throw new AppError('获取待办事项失败', 500);
   }
 };
 
 // 创建待办事项
 export const createTodo = async (req: Request, res: Response): Promise<void> => {
   const { text, completed = false }: CreateTodoRequest = req.body;
-  
   try {
     if (!text || text.trim() === '') {
       res.status(400).json({ error: '待办事项内容不能为空', timestamp: new Date().toISOString() });
@@ -166,7 +158,7 @@ export const createTodo = async (req: Request, res: Response): Promise<void> => 
 
     const newTodo = await prisma.todo.create({
       data: {
-        id: Date.now(),
+        id: req.body.id,
         text: text.trim(),
         completed
       }
@@ -185,11 +177,7 @@ export const createTodo = async (req: Request, res: Response): Promise<void> => 
       error: error instanceof Error ? error.message : '未知错误',
       stack: error instanceof Error ? error.stack : undefined,
     });
-    res.status(500).json({
-      error: '创建待办事项失败',
-      message: error instanceof Error ? error.message : '未知错误',
-      timestamp: new Date().toISOString()
-    });
+    throw new AppError('创建待办事项失败', 400 );
   }
 };
 
@@ -197,7 +185,7 @@ export const createTodo = async (req: Request, res: Response): Promise<void> => 
 export const updateTodo = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
   const { id } = req.params;
   const { text, completed }: UpdateTodoRequest = req.body;
-  
+
   try {
     if (!id) {
       res.status(400).json({ error: '缺少 id 参数', timestamp: new Date().toISOString() });
@@ -237,11 +225,7 @@ export const updateTodo = async (req: Request<{ id: string }>, res: Response): P
       res.status(404).json({ error: '待办事项不存在', timestamp: new Date().toISOString() });
       return;
     }
-    res.status(500).json({
-      error: '更新待办事项失败',
-      message: error instanceof Error ? error.message : '未知错误',
-      timestamp: new Date().toISOString()
-    });
+    throw new AppError('更新待办事项失败', 500);
   }
 };
 
@@ -249,7 +233,7 @@ export const updateTodo = async (req: Request<{ id: string }>, res: Response): P
 export const patchTodo = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
   const { id } = req.params;
   const { text, completed }: UpdateTodoRequest = req.body;
-  
+
   try {
     if (!id) {
       res.status(400).json({ error: '缺少 id 参数', timestamp: new Date().toISOString() });
@@ -287,18 +271,14 @@ export const patchTodo = async (req: Request<{ id: string }>, res: Response): Pr
       res.status(404).json({ error: '待办事项不存在', timestamp: new Date().toISOString() });
       return;
     }
-    res.status(500).json({
-      error: '更新待办事项失败',
-      message: error instanceof Error ? error.message : '未知错误',
-      timestamp: new Date().toISOString()
-    });
+    throw new AppError('更新待办事项失败', 500);
   }
 };
 
 // 删除待办事项
 export const deleteTodo = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
   const { id } = req.params;
-  
+
   try {
     if (!id) {
       res.status(400).json({ error: '缺少 id 参数', timestamp: new Date().toISOString() });
@@ -326,10 +306,6 @@ export const deleteTodo = async (req: Request<{ id: string }>, res: Response): P
       res.status(404).json({ error: '待办事项不存在', timestamp: new Date().toISOString() });
       return;
     }
-    res.status(500).json({
-      error: '删除待办事项失败',
-      message: error instanceof Error ? error.message : '未知错误',
-      timestamp: new Date().toISOString()
-    });
+    throw new AppError('删除待办事项失败', 500);
   }
 }; 
