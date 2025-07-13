@@ -2,21 +2,44 @@ import { Request, Response } from 'express';
 import prisma from '../lib/prisma.js';
 import type { Todo, CreateTodoRequest, UpdateTodoRequest } from '../interface.js';
 
-// 获取所有待办事项
+// 获取所有待办事项（支持分页）
 export const getAllTodos = async (req: Request, res: Response): Promise<void> => {
   try {
-    const todos = await prisma.todo.findMany(
-      {
-        orderBy: {
-          id: 'asc', // 或 'desc'
-        }
+    // 获取分页参数
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 5; // 默认每页5条
+    const skip = (page - 1) * limit;
+
+
+    // 获取总数
+    const totalCount = await prisma.todo.count();
+    
+    // 获取分页数据
+    const todos = await prisma.todo.findMany({
+      orderBy: {
+        id: 'desc', // 按ID倒序，最新的数据在前面
       },
-    );
-    console.log("wjs: todos", todos);
+      skip: skip,
+      take: limit,
+    });
+
+    // 计算分页信息
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
 
     res.status(200).json({
       data: todos,
-      count: todos.length,
+      pagination: {
+        currentPage: page,
+        totalPages: totalPages,
+        totalCount: totalCount,
+        limit: limit,
+        hasNextPage: hasNextPage,
+        hasPrevPage: hasPrevPage,
+        nextPage: hasNextPage ? page + 1 : null,
+        prevPage: hasPrevPage ? page - 1 : null
+      },
       timestamp: new Date().toISOString()
     });
   } catch (error) {

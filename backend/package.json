@@ -5,9 +5,10 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
+    "init:database": "node scripts/import-data.js",
     "build": "npx prisma generate && tsc",
-    "dev": "nodemon",
-    "dev:chrome": "nodemon --inspect",
+    "dev": "tsc --watch & nodemon dist/server.js",
+    "dev:chrome": "tsc --watch & nodemon --inspect dist/server.js",
     "start": "node dist/server.js",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",

@@ -1,17 +1,252 @@
 [
   {
     "id": 1,
-    "text": "学习 React 基础1",
+    "text": "学习 React 基础 1",
     "completed": false
   },
   {
     "id": 2,
-    "text": "学习 Express.js",
+    "text": "学习 Express.js 1",
     "completed": false
   },
   {
     "id": 3,
-    "text": "完成 TODO 应用",
+    "text": "完成 TODO 应用 1",
     "completed": true
+  },
+  {
+    "id": 4,
+    "text": "学习 TypeScript 1",
+    "completed": false
+  },
+  {
+    "id": 5,
+    "text": "学习 Prisma ORM 1",
+    "completed": false
+  },
+  {
+    "id": 6,
+    "text": "学习 Node.js 异步编程 1",
+    "completed": true
+  },
+  {
+    "id": 7,
+    "text": "学习 RESTful API 设计 1",
+    "completed": false
+  },
+  {
+    "id": 8,
+    "text": "学习数据库设计 1",
+    "completed": false
+  },
+  {
+    "id": 9,
+    "text": "学习前端路由 1",
+    "completed": true
+  },
+  {
+    "id": 10,
+    "text": "学习状态管理 1",
+    "completed": false
+  },
+  {
+    "id": 11,
+    "text": "学习组件化开发 1",
+    "completed": false
+  },
+  {
+    "id": 12,
+    "text": "学习 CSS Grid 布局 1",
+    "completed": true
+  },
+  {
+    "id": 13,
+    "text": "学习 Flexbox 布局 1",
+    "completed": false
+  },
+  {
+    "id": 14,
+    "text": "学习响应式设计 1",
+    "completed": false
+  },
+  {
+    "id": 15,
+    "text": "学习性能优化 1",
+    "completed": true
+  },
+  {
+    "id": 16,
+    "text": "学习 Git 版本控制 1",
+    "completed": false
+  },
+  {
+    "id": 17,
+    "text": "学习 Docker 容器化 1",
+    "completed": false
+  },
+  {
+    "id": 18,
+    "text": "学习 CI/CD 流程 1",
+    "completed": true
+  },
+  {
+    "id": 19,
+    "text": "学习单元测试 1",
+    "completed": false
+  },
+  {
+    "id": 20,
+    "text": "学习集成测试 1",
+    "completed": false
+  },
+  {
+    "id": 21,
+    "text": "学习前端构建工具 1",
+    "completed": true
+  },
+  {
+    "id": 22,
+    "text": "学习后端框架 1",
+    "completed": false
+  },
+  {
+    "id": 23,
+    "text": "学习数据库优化 1",
+    "completed": false
+  },
+  {
+    "id": 24,
+    "text": "学习缓存策略 1",
+    "completed": true
+  },
+  {
+    "id": 25,
+    "text": "学习安全防护 1",
+    "completed": false
+  },
+  {
+    "id": 26,
+    "text": "学习日志管理 1",
+    "completed": false
+  },
+  {
+    "id": 27,
+    "text": "学习监控告警 1",
+    "completed": true
+  },
+  {
+    "id": 28,
+    "text": "学习负载均衡 1",
+    "completed": false
+  },
+  {
+    "id": 29,
+    "text": "学习微服务架构 1",
+    "completed": false
+  },
+  {
+    "id": 30,
+    "text": "学习云原生技术 1",
+    "completed": true
+  },
+  {
+    "id": 31,
+    "text": "学习 DevOps 实践 1",
+    "completed": false
+  },
+  {
+    "id": 32,
+    "text": "学习敏捷开发 1",
+    "completed": false
+  },
+  {
+    "id": 33,
+    "text": "学习代码重构 1",
+    "completed": true
+  },
+  {
+    "id": 34,
+    "text": "学习设计模式 1",
+    "completed": false
+  },
+  {
+    "id": 35,
+    "text": "学习算法数据结构 1",
+    "completed": false
+  },
+  {
+    "id": 36,
+    "text": "学习网络协议 1",
+    "completed": true
+  },
+  {
+    "id": 37,
+    "text": "学习操作系统 1",
+    "completed": false
+  },
+  {
+    "id": 38,
+    "text": "学习编译原理 1",
+    "completed": false
+  },
+  {
+    "id": 39,
+    "text": "学习机器学习基础 1",
+    "completed": true
+  },
+  {
+    "id": 40,
+    "text": "学习深度学习 1",
+    "completed": false
+  },
+  {
+    "id": 41,
+    "text": "学习自然语言处理 1",
+    "completed": false
+  },
+  {
+    "id": 42,
+    "text": "学习计算机视觉 1",
+    "completed": true
+  },
+  {
+    "id": 43,
+    "text": "学习数据挖掘 1",
+    "completed": false
+  },
+  {
+    "id": 44,
+    "text": "学习大数据处理 1",
+    "completed": false
+  },
+  {
+    "id": 45,
+    "text": "学习区块链技术 1",
+    "completed": true
+  },
+  {
+    "id": 46,
+    "text": "学习物联网开发 1",
+    "completed": false
+  },
+  {
+    "id": 47,
+    "text": "学习移动端开发 1",
+    "completed": false
+  },
+  {
+    "id": 48,
+    "text": "学习桌面应用开发 1",
+    "completed": true
+  },
+  {
+    "id": 49,
+    "text": "学习游戏开发 1",
+    "completed": false
+  },
+  {
+    "id": 50,
+    "text": "学习音视频处理 1",
+    "completed": false
   }
 ]

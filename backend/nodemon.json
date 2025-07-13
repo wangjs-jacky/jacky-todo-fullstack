@@ -1,9 +1,9 @@
 {
-  "watch": ["src/**/*", "data.json"],
-  "ext": "ts,js,json",
+  "watch": ["dist/**/*", "data.json"],
+  "ext": "js,json",
   "ignore": [
     "node_modules/",
-    "dist/",
+    "src/",
     "*.test.ts",
     "*.spec.ts",
     "*.test.js",

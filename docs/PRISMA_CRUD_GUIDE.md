@@ -14,8 +14,8 @@ model Todo {
   text      String  @map("text")
   completed Boolean @map("completed")
 
-  @@map("todo")
-}
+  @@map("todo")  
+} 
 ```
 
 **字段说明：**
