@@ -10,22 +10,43 @@ dotenv.config();
 const app = express();
 const PORT: number = parseInt(process.env.PORT || '3001', 10);
 
-// 配置限流中间件 - 1秒内最多10次请求
-const limiter = rateLimit({
-  windowMs: 1000, // 1秒时间窗口
-  max: 10, // 最多10次请求
+// 配置宽松的限流中间件 - 用于欢迎页面和健康检查
+const welcomeLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1分钟时间窗口
+  max: 100, // 每分钟最多100次请求
   message: {
     error: '请求过于频繁',
-    message: '请稍后再试，每秒最多允许10次请求',
+    message: '请稍后再试，每分钟最多允许100次请求',
     timestamp: new Date().toISOString()
   },
-  standardHeaders: 'draft-8', // 返回标准的 RateLimit header (draft-8)
-  legacyHeaders: false, // 不返回 X-RateLimit-* headers
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
   handler: (req: Request, res: Response) => {
     res.status(429).json({
       error: '请求过于频繁',
-      message: '请稍后再试，每秒最多允许10次请求',
-      retryAfter: Math.ceil(1000 / 1000), // 1秒后重试
+      message: '请稍后再试，每分钟最多允许100次请求',
+      retryAfter: Math.ceil(60), // 1分钟后重试
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// 配置严格的限流中间件 - 用于 API 端点
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1分钟时间窗口
+  max: 30, // 每分钟最多30次请求
+  message: {
+    error: 'API 请求过于频繁',
+    message: '请稍后再试，每分钟最多允许30次 API 请求',
+    timestamp: new Date().toISOString()
+  },
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  handler: (req: Request, res: Response) => {
+    res.status(429).json({
+      error: 'API 请求过于频繁',
+      message: '请稍后再试，每分钟最多允许30次 API 请求',
+      retryAfter: Math.ceil(60), // 1分钟后重试
       timestamp: new Date().toISOString()
     });
   }
@@ -37,8 +58,12 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// 应用限流中间件到所有路由
-app.use(limiter);
+// 对欢迎页面和健康检查应用宽松限流
+app.use('/welcome', welcomeLimiter);
+app.use('/health', welcomeLimiter);
+
+// 对 API 路由应用严格限流
+app.use('/api', apiLimiter);
 
 // 使用 API 路由
 app.use('/api', routes);
@@ -94,7 +119,9 @@ app.listen(PORT, () => {
   console.log(`💓 健康检查: GET /health - 心跳测试端点`);
   console.log(`📝 欢迎页面: GET /welcome - 查看欢迎信息`);
   console.log(`✨ 使用 Express 5 + TypeScript 的新特性！`);
-  console.log(`🛡️  限流配置: 每秒最多 10 次请求`);
+  console.log(`🛡️  分级限流配置:`);
+  console.log(`   📊 欢迎页面 & 健康检查: 每分钟 100 次请求`);
+  console.log(`   🔒 API 端点: 每分钟 30 次请求`);
   console.log(`🔄 RESTful API 端点:`);
   console.log(`   GET    /api/todos     - 获取所有待办事项`);
   console.log(`   GET    /api/todos/:id - 获取单个待办事项`);
