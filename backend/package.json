@@ -14,13 +14,15 @@
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
-    "test:prisma": "node scripts/test-prisma.js"
+    "test:prisma": "node scripts/test-prisma.js",
+    "test:rate-limit": "node scripts/test-rate-limit.js"
   },
   "dependencies": {
     "@prisma/client": "^6.11.1",
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
+    "express-rate-limit": "^7.5.1",
     "prisma": "^6.11.1"
   },
   "devDependencies": {

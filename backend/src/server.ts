@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
 import routes from './routes/index.js';
 
 // 加载环境变量
@@ -9,16 +10,58 @@ dotenv.config();
 const app = express();
 const PORT: number = parseInt(process.env.PORT || '3001', 10);
 
+// 配置限流中间件 - 1秒内最多10次请求
+const limiter = rateLimit({
+  windowMs: 1000, // 1秒时间窗口
+  max: 10, // 最多10次请求
+  message: {
+    error: '请求过于频繁',
+    message: '请稍后再试，每秒最多允许10次请求',
+    timestamp: new Date().toISOString()
+  },
+  standardHeaders: 'draft-8', // 返回标准的 RateLimit header (draft-8)
+  legacyHeaders: false, // 不返回 X-RateLimit-* headers
+  handler: (req: Request, res: Response) => {
+    res.status(429).json({
+      error: '请求过于频繁',
+      message: '请稍后再试，每秒最多允许10次请求',
+      retryAfter: Math.ceil(1000 / 1000), // 1秒后重试
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // 中间件
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3001'
 }));
 app.use(express.json());
 
+// 应用限流中间件到所有路由
+app.use(limiter);
+
 // 使用 API 路由
 app.use('/api', routes);
 
-// 简单的 GET /welcome 路由 - Express 5 版本
+// 健康检查端点 - 用于心跳测试
+app.get('/health', (req: Request, res: Response) => {
+  res.json({
+    status: 'healthy',
+    message: '服务器运行正常',
+    version: 'Express 5.1.0',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development',
+    features: [
+      '改进的错误处理',
+      '更好的 TypeScript 支持',
+      '新的路由功能',
+      '性能优化'
+    ]
+  });
+});
+
+// 保留原有的欢迎路由
 app.get('/welcome', (req: Request, res: Response) => {
   res.json({
     message: '欢迎使用 Express 5 后端服务器！',
@@ -48,8 +91,10 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 // 启动服务器
 app.listen(PORT, () => {
   console.log(`🚀 Express 5 TypeScript 服务器运行在 http://localhost:${PORT}`);
-  console.log(`📝 访问 GET /welcome 路由查看欢迎信息`);
+  console.log(`💓 健康检查: GET /health - 心跳测试端点`);
+  console.log(`📝 欢迎页面: GET /welcome - 查看欢迎信息`);
   console.log(`✨ 使用 Express 5 + TypeScript 的新特性！`);
+  console.log(`🛡️  限流配置: 每秒最多 10 次请求`);
   console.log(`🔄 RESTful API 端点:`);
   console.log(`   GET    /api/todos     - 获取所有待办事项`);
   console.log(`   GET    /api/todos/:id - 获取单个待办事项`);
