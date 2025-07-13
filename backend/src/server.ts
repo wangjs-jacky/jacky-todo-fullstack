@@ -1,10 +1,11 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import rateLimit from 'express-rate-limit';
 import routes from './routes/index.js';
 import { requestLogger } from './middleware/logger.js';
-import AppError from './lib/AppError.js';
+import { errorHandler } from './lib/errorHandler.js';
+import { healthCheck, welcomePage } from './controller/SystemController.js';
+import { welcomeLimiter, apiLimiter } from './lib/rateLimiters.js';
 
 // 加载环境变量
 dotenv.config();
@@ -12,47 +13,7 @@ dotenv.config();
 const app = express();
 const PORT: number = parseInt(process.env.PORT || '3001', 10);
 
-// 配置宽松的限流中间件 - 用于欢迎页面和健康检查
-const welcomeLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1分钟时间窗口
-  max: 100, // 每分钟最多100次请求
-  message: {
-    error: '请求过于频繁',
-    message: '请稍后再试，每分钟最多允许100次请求',
-    timestamp: new Date().toISOString()
-  },
-  standardHeaders: 'draft-8',
-  legacyHeaders: false,
-  handler: (req: Request, res: Response) => {
-    res.status(429).json({
-      error: '请求过于频繁',
-      message: '请稍后再试，每分钟最多允许100次请求',
-      retryAfter: Math.ceil(60), // 1分钟后重试
-      timestamp: new Date().toISOString()
-    });
-  }
-});
 
-// 配置严格的限流中间件 - 用于 API 端点
-const apiLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1分钟时间窗口
-  max: 30, // 每分钟最多30次请求
-  message: {
-    error: 'API 请求过于频繁',
-    message: '请稍后再试，每分钟最多允许30次 API 请求',
-    timestamp: new Date().toISOString()
-  },
-  standardHeaders: 'draft-8',
-  legacyHeaders: false,
-  handler: (req: Request, res: Response) => {
-    res.status(429).json({
-      error: 'API 请求过于频繁',
-      message: '请稍后再试，每分钟最多允许30次 API 请求',
-      retryAfter: Math.ceil(60), // 1分钟后重试
-      timestamp: new Date().toISOString()
-    });
-  }
-});
 
 // 中间件
 app.use(cors({
@@ -70,54 +31,14 @@ app.use('/welcome', welcomeLimiter);
 app.use('/api', apiLimiter, routes);
 
 // 健康检查端点 - 用于心跳测试（直接应用限流）
-app.get('/health', welcomeLimiter, (req: Request, res: Response) => {
-  res.json({
-    status: 'healthy',
-    message: '服务器运行正常',
-    version: 'Express 5.1.0',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development',
-    features: [
-      '改进的错误处理',
-      '更好的 TypeScript 支持',
-      '新的路由功能',
-      '性能优化'
-    ]
-  });
-});
+app.get('/health', welcomeLimiter, healthCheck);
 
 // 保留原有的欢迎路由
-app.get('/welcome', (req: Request, res: Response) => {
-  res.json({
-    message: '欢迎使用 Express 5 后端服务器！',
-    version: 'Express 5.1.0',
-    status: 'success',
-    timestamp: new Date().toISOString(),
-    features: [
-      '改进的错误处理',
-      '更好的 TypeScript 支持',
-      '新的路由功能',
-      '性能优化'
-    ]
-  });
-});
+app.get('/welcome', welcomePage);
 
 // Express 5 的全局错误处理中间件
 // 并不是所有的报错是 500 错误，比如用户传入了相同的 id 时，需要返回 400 报错
-app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
-  const {
-    statusCode = 500,
-    message = '服务器内部错误',
-  } = err;
-
-  // 自定义错误
-  res.status(statusCode).json({
-    rootMessageId: req.id,
-    error: message,
-    timestamp: new Date().toISOString()
-  });
-});
+app.use(errorHandler);
 
 // 启动服务器
 app.listen(PORT, () => {
