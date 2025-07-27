@@ -3,17 +3,15 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import routes from './routes/index.js';
 import { requestLogger, performanceLogger, errorLogger } from './middleware/logger.js';
-import { errorHandler } from './lib/errorHandler.js';
 import { healthCheck, welcomePage } from './controller/SystemController.js';
-import { welcomeLimiter, apiLimiter } from './lib/rateLimiters.js';
+import { apiLimiter, welcomeLimiter } from './middleware/rateLimiters.js';
+import errorHandler from './middleware/errorHandler.js';
 
 // 加载环境变量
 dotenv.config();
 
 const app = express();
 const PORT: number = parseInt(process.env.PORT || '3001', 10);
-
-
 
 // 中间件
 app.use(cors({
