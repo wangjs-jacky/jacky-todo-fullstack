@@ -10,6 +10,8 @@ const generateRequestId = () => {
 export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
   // 生成请求 ID
   const requestId = generateRequestId();
+
+  // 扩展 req 上的 id 属性
   req.id = requestId;
   
   // 记录请求开始

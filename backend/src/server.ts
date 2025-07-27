@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import routes from './routes/index.js';
-import { requestLogger } from './middleware/logger.js';
+import { requestLogger, performanceLogger, errorLogger } from './middleware/logger.js';
 import { errorHandler } from './lib/errorHandler.js';
 import { healthCheck, welcomePage } from './controller/SystemController.js';
 import { welcomeLimiter, apiLimiter } from './lib/rateLimiters.js';
@@ -24,6 +24,9 @@ app.use(express.json());
 // 日志中间件
 app.use(requestLogger);
 
+// 性能监控中间件
+app.use(performanceLogger);
+
 // 对欢迎页面应用宽松限流
 app.use('/welcome', welcomeLimiter);
 
@@ -35,6 +38,9 @@ app.get('/health', welcomeLimiter, healthCheck);
 
 // 保留原有的欢迎路由
 app.get('/welcome', welcomePage);
+
+// 错误日志中间件
+app.use(errorLogger);
 
 // Express 5 的全局错误处理中间件
 // 并不是所有的报错是 500 错误，比如用户传入了相同的 id 时，需要返回 400 报错
